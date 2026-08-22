@@ -1,0 +1,14 @@
+[
+  {
+    "fee_plan_id": "PLN_STD",
+    "default_rate_bps": 200,
+    "overrides": {}
+  },
+  {
+    "fee_plan_id": "PLN_ENT_2024",
+    "default_rate_bps": 200,
+    "overrides": {
+      "netbanking": 190
+    }
+  }
+]
