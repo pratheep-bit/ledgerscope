@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,26 +16,57 @@
 
   <style>
     :root {
+      /* Default Clean White/Light Theme */
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-glow: rgba(37, 99, 235, 0.2);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      
+      --accent-blue: #2563eb;
+      --accent-indigo: #4f46e5;
+      --accent-purple: #7c3aed;
+      --accent-emerald: #059669;
+      --accent-amber: #d97706;
+      --accent-rose: #e11d48;
+      --accent-cyan: #0891b2;
+
+      --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+      --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --table-head-bg: #f8fafc;
+      --table-row-hover: #f8fafc;
+      --table-border: #f1f5f9;
+      --action-box-bg: #f0fdf4;
+      --action-box-border: #10b981;
+
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html.dark {
       --bg-base: #090d16;
       --bg-surface: #0f172a;
       --bg-card: #131d35;
       --bg-card-hover: #192644;
       --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.15);
       --border-glow: rgba(59, 130, 246, 0.3);
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
-      
-      --accent-blue: #3b82f6;
-      --accent-indigo: #6366f1;
-      --accent-purple: #8b5cf6;
-      --accent-emerald: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-rose: #f43f5e;
-      --accent-cyan: #06b6d4;
 
-      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      --card-shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.6);
+      --table-head-bg: rgba(255, 255, 255, 0.02);
+      --table-row-hover: rgba(255, 255, 255, 0.02);
+      --table-border: rgba(255, 255, 255, 0.04);
+      --action-box-bg: rgba(15, 23, 42, 0.7);
+      --action-box-border: #3b82f6;
     }
 
     * {
@@ -53,9 +84,10 @@
       flex-direction: column;
       overflow-x: hidden;
       line-height: 1.5;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    /* Subtle background grid & glow */
+    /* Subtle background glow */
     .bg-glow {
       position: fixed;
       top: 0;
@@ -63,11 +95,18 @@
       width: 100vw;
       height: 100vh;
       background: 
+        radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(124, 58, 237, 0.04) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    html.dark .bg-glow {
+      background: 
         radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
         radial-gradient(circle at 85% 20%, rgba(139, 92, 246, 0.07) 0%, transparent 45%),
         radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
     }
 
     /* Layout */
@@ -83,12 +122,12 @@
     /* Top Navbar */
     .navbar {
       border-bottom: 1px solid var(--border-subtle);
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(16px);
+      background: var(--bg-surface);
       position: sticky;
       top: 0;
       z-index: 100;
       padding: 14px 0;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
     .navbar-inner {
@@ -105,32 +144,33 @@
     }
 
     .brand-logo {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
 
     .brand-text h1 {
-      font-size: 1.15rem;
+      font-size: 1.18rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       display: flex;
       align-items: center;
       gap: 8px;
+      color: var(--text-primary);
     }
 
     .brand-badge {
       font-size: 0.68rem;
       font-weight: 700;
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+      border: 1px solid rgba(37, 99, 235, 0.25);
       padding: 2px 8px;
       border-radius: 6px;
       text-transform: uppercase;
@@ -151,7 +191,7 @@
     .status-pill {
       font-size: 0.75rem;
       font-family: var(--font-mono);
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--bg-card-hover);
       border: 1px solid var(--border-subtle);
       padding: 6px 12px;
       border-radius: 20px;
@@ -162,6 +202,12 @@
     }
 
     .status-pill.success {
+      color: #059669;
+      border-color: rgba(16, 185, 129, 0.3);
+      background: #ecfdf5;
+    }
+
+    html.dark .status-pill.success {
       color: #34d399;
       border-color: rgba(16, 185, 129, 0.25);
       background: rgba(16, 185, 129, 0.06);
@@ -195,30 +241,52 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #3b82f6, #4f46e5);
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
       color: #fff;
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
     }
 
     .btn-primary:hover {
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
       transform: translateY(-1px);
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg-surface);
       color: var(--text-secondary);
-      border-color: var(--border-subtle);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--card-shadow);
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.09);
+      background: var(--bg-card-hover);
       color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .theme-toggle-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
     }
 
     /* Main Content */
     main {
-      padding: 32px 0 60px;
+      padding: 28px 0 60px;
       flex: 1;
     }
 
@@ -228,7 +296,7 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       padding-bottom: 12px;
     }
 
@@ -254,24 +322,25 @@
 
     .tab-btn:hover {
       color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--bg-card-hover);
     }
 
     .tab-btn.active {
-      background: var(--bg-card);
-      color: #60a5fa;
-      border-color: rgba(59, 130, 246, 0.3);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      background: var(--bg-surface);
+      color: var(--accent-blue);
+      border-color: var(--border-subtle);
+      box-shadow: var(--card-shadow);
     }
 
     .batch-badge {
       font-family: var(--font-mono);
       font-size: 0.8rem;
       color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.04);
-      padding: 4px 10px;
-      border-radius: 6px;
+      background: var(--bg-surface);
+      padding: 6px 12px;
+      border-radius: 8px;
       border: 1px solid var(--border-subtle);
+      box-shadow: var(--card-shadow);
     }
 
     /* KPI Grid */
@@ -279,7 +348,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 16px;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     .kpi-card {
@@ -289,12 +358,14 @@
       padding: 20px;
       position: relative;
       overflow: hidden;
-      transition: transform 0.2s, border-color 0.2s;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
 
     .kpi-card:hover {
       transform: translateY(-2px);
-      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: var(--card-shadow-hover);
+      border-color: var(--border-strong);
     }
 
     .kpi-card::before {
@@ -304,12 +375,12 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, var(--card-color, #3b82f6), transparent);
+      background: linear-gradient(90deg, var(--card-color, #2563eb), transparent);
     }
 
     .kpi-title {
-      font-size: 0.78rem;
-      font-weight: 600;
+      font-size: 0.76rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
@@ -320,11 +391,12 @@
     }
 
     .kpi-value {
-      font-size: 1.85rem;
+      font-size: 1.95rem;
       font-weight: 800;
       letter-spacing: -0.03em;
       font-family: var(--font-mono);
       margin-bottom: 6px;
+      color: var(--text-primary);
     }
 
     .kpi-sub {
@@ -340,15 +412,16 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .section-title {
       font-size: 1.25rem;
-      font-weight: 700;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 10px;
+      color: var(--text-primary);
     }
 
     .section-subtitle {
@@ -360,8 +433,8 @@
     .findings-container {
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      margin-bottom: 36px;
+      gap: 16px;
+      margin-bottom: 32px;
     }
 
     .finding-card {
@@ -370,11 +443,17 @@
       border-radius: 14px;
       padding: 22px 24px;
       position: relative;
+      box-shadow: var(--card-shadow);
       transition: all 0.2s;
     }
 
     .finding-card.promoted {
-      border-color: rgba(59, 130, 246, 0.4);
+      border-color: rgba(37, 99, 235, 0.4);
+      background: linear-gradient(180deg, #eff6ff 0%, var(--bg-surface) 100%);
+      box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+    }
+
+    html.dark .finding-card.promoted {
       background: linear-gradient(180deg, rgba(30, 58, 138, 0.12) 0%, var(--bg-surface) 100%);
       box-shadow: 0 8px 30px rgba(15, 23, 42, 0.6);
     }
@@ -400,8 +479,9 @@
       font-size: 0.85rem;
       padding: 4px 8px;
       border-radius: 6px;
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--bg-card-hover);
       border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
     }
 
     .verdict-tag {
@@ -417,15 +497,27 @@
     }
 
     .verdict-tag.promoted {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    html.dark .verdict-tag.promoted {
       background: rgba(16, 185, 129, 0.15);
       color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-color: rgba(16, 185, 129, 0.35);
     }
 
     .verdict-tag.pattern {
+      background: #fffbeb;
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    html.dark .verdict-tag.pattern {
       background: rgba(245, 158, 11, 0.12);
       color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-color: rgba(245, 158, 11, 0.25);
     }
 
     .confidence-tag {
@@ -437,26 +529,26 @@
     }
 
     .confidence-tag.high {
-      background: rgba(59, 130, 246, 0.18);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid rgba(37, 99, 235, 0.3);
     }
 
     .confidence-tag.medium {
-      background: rgba(139, 92, 246, 0.18);
-      color: #a78bfa;
-      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: #f5f3ff;
+      color: #7c3aed;
+      border: 1px solid rgba(124, 58, 237, 0.3);
     }
 
     .confidence-tag.low {
-      background: rgba(100, 116, 139, 0.15);
-      color: #94a3b8;
-      border: 1px solid rgba(100, 116, 139, 0.25);
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
     }
 
     .cause-name {
-      font-size: 1.12rem;
-      font-weight: 700;
+      font-size: 1.15rem;
+      font-weight: 800;
       color: var(--text-primary);
       margin-top: 6px;
     }
@@ -473,9 +565,9 @@
     }
 
     .impact-val {
-      font-size: 1.25rem;
+      font-size: 1.35rem;
       font-weight: 800;
-      color: #f87171;
+      color: #e11d48;
     }
 
     .impact-monthly {
@@ -493,21 +585,25 @@
     .attr-chip {
       font-family: var(--font-mono);
       font-size: 0.75rem;
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--bg-card-hover);
       border: 1px solid var(--border-subtle);
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 6px;
       color: var(--text-secondary);
     }
 
     .attr-chip span {
+      color: #2563eb;
+      font-weight: 700;
+    }
+
+    html.dark .attr-chip span {
       color: #93c5fd;
-      font-weight: 600;
     }
 
     .action-box {
-      background: rgba(15, 23, 42, 0.7);
-      border-left: 3px solid #3b82f6;
+      background: var(--action-box-bg);
+      border-left: 3px solid var(--action-box-border);
       border-radius: 0 8px 8px 0;
       padding: 12px 16px;
       margin-top: 14px;
@@ -515,32 +611,41 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
+      border: 1px solid var(--border-subtle);
+      border-left-width: 4px;
     }
 
     .action-text {
       font-size: 0.86rem;
-      color: #e2e8f0;
+      color: var(--text-primary);
       line-height: 1.45;
     }
 
     .action-text strong {
+      color: #2563eb;
+    }
+
+    html.dark .action-text strong {
       color: #60a5fa;
     }
 
     .btn-copy-action {
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: #ffffff;
+      color: #2563eb;
+      border: 1px solid #cbd5e1;
       padding: 6px 12px;
       font-size: 0.76rem;
       border-radius: 6px;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.15s;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
 
     .btn-copy-action:hover {
-      background: rgba(59, 130, 246, 0.25);
+      background: #eff6ff;
+      border-color: #93c5fd;
     }
 
     /* Analytics Grid */
@@ -548,7 +653,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
-      margin-bottom: 36px;
+      margin-bottom: 32px;
     }
 
     @media (max-width: 900px) {
@@ -562,6 +667,7 @@
       border: 1px solid var(--border-subtle);
       border-radius: 14px;
       padding: 20px;
+      box-shadow: var(--card-shadow);
     }
 
     .chart-title {
@@ -571,6 +677,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      color: var(--text-primary);
     }
 
     .chart-wrapper {
@@ -585,6 +692,7 @@
       border-radius: 14px;
       overflow: hidden;
       margin-bottom: 40px;
+      box-shadow: var(--card-shadow);
     }
 
     .table-toolbar {
@@ -600,7 +708,7 @@
     .search-input-group {
       display: flex;
       align-items: center;
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--bg-card-hover);
       border: 1px solid var(--border-subtle);
       border-radius: 8px;
       padding: 6px 12px;
@@ -627,20 +735,28 @@
     .chip-btn {
       font-size: 0.75rem;
       font-family: var(--font-mono);
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       color: var(--text-muted);
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.15s;
+      font-weight: 600;
     }
 
     .chip-btn:hover {
       color: var(--text-secondary);
+      background: var(--bg-card-hover);
     }
 
     .chip-btn.active {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #2563eb;
+    }
+
+    html.dark .chip-btn.active {
       background: rgba(59, 130, 246, 0.15);
       border-color: rgba(59, 130, 246, 0.35);
       color: #60a5fa;
@@ -658,9 +774,9 @@
     }
 
     th {
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--table-head-bg);
       color: var(--text-muted);
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       font-size: 0.7rem;
       letter-spacing: 0.05em;
@@ -671,13 +787,13 @@
 
     td {
       padding: 12px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--table-border);
       color: var(--text-secondary);
       font-family: var(--font-mono);
     }
 
     tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--table-row-hover);
       color: var(--text-primary);
     }
 
@@ -687,25 +803,37 @@
       border-radius: 4px;
       font-size: 0.72rem;
       font-weight: 700;
+      background: #ffe4e6;
+      color: #e11d48;
+      border: 1px solid #fecdd3;
+    }
+
+    html.dark .code-badge {
       background: rgba(239, 68, 68, 0.15);
       color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-color: rgba(239, 68, 68, 0.3);
     }
 
     .code-badge.clean {
+      background: #dcfce7;
+      color: #059669;
+      border-color: #bbf7d0;
+    }
+
+    html.dark .code-badge.clean {
       background: rgba(16, 185, 129, 0.12);
       color: #34d399;
       border-color: rgba(16, 185, 129, 0.25);
     }
 
     .delta-pos {
-      color: #f87171;
-      font-weight: 600;
+      color: #e11d48;
+      font-weight: 700;
     }
 
     .delta-neg {
-      color: #60a5fa;
-      font-weight: 600;
+      color: #2563eb;
+      font-weight: 700;
     }
 
     .delta-zero {
@@ -719,8 +847,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(6px);
       z-index: 200;
       display: none;
       align-items: center;
@@ -730,13 +858,13 @@
 
     .drawer-content {
       background: var(--bg-surface);
-      border: 1px solid var(--border-glow);
+      border: 1px solid var(--border-strong);
       border-radius: 16px;
       width: 100%;
       max-width: 640px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
       animation: modalSlide 0.2s ease-out;
     }
 
@@ -764,6 +892,7 @@
       font-size: 0.8rem;
       color: var(--text-muted);
       text-align: center;
+      background: var(--bg-surface);
     }
   </style>
 </head>
@@ -779,8 +908,8 @@
           <i data-lucide="shield-check"></i>
         </div>
         <div class="brand-text">
-          <h1>Ledgerscope <span class="brand-badge">PROD RECONCILER</span></h1>
-          <div class="brand-tagline">Deterministic Settlement Auditor for Razorpay Merchants</div>
+          <h1>Ledgerscope <span class="brand-badge">SETTLEMENT AUDITOR</span></h1>
+          <div class="brand-tagline">Deterministic Fee & Tax Reconciliation for Razorpay Merchants</div>
         </div>
       </div>
 
@@ -800,6 +929,10 @@
       </div>
 
       <div class="nav-actions">
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          <i data-lucide="sun" id="themeIcon" style="width:14px; height:14px;"></i>
+          <span id="themeText">Light</span>
+        </button>
         <button class="btn btn-secondary" onclick="exportDisputeReport()">
           <i data-lucide="download"></i>
           <span>Export Audit Report</span>
@@ -832,7 +965,7 @@
         </button>
       </div>
       <div class="batch-badge">
-        Batch: <strong style="color: #60a5fa;">STL_2026_08</strong> · 62 Records · 3 Calendar Days
+        Batch: <strong style="color: #2563eb;">STL_2026_08</strong> · 62 Records · 3 Calendar Days
       </div>
     </div>
 
@@ -841,7 +974,7 @@
       
       <!-- Top KPIs -->
       <div class="kpi-grid">
-        <div class="kpi-card" style="--card-color: #3b82f6;">
+        <div class="kpi-card" style="--card-color: #2563eb;">
           <div class="kpi-title">
             <span>Total Ingested Volume</span>
             <i data-lucide="database" style="width:16px; height:16px;"></i>
@@ -852,34 +985,34 @@
           </div>
         </div>
 
-        <div class="kpi-card" style="--card-color: #10b981;">
+        <div class="kpi-card" style="--card-color: #059669;">
           <div class="kpi-title">
             <span>Clean Settlement Match</span>
-            <i data-lucide="check-check" style="width:16px; height:16px; color:#34d399;"></i>
+            <i data-lucide="check-check" style="width:16px; height:16px; color:#059669;"></i>
           </div>
-          <div class="kpi-value" style="color:#34d399;">71.0%</div>
+          <div class="kpi-value" style="color:#059669;">71.0%</div>
           <div class="kpi-sub">
             <span>44 / 62 transactions matched perfectly</span>
           </div>
         </div>
 
-        <div class="kpi-card" style="--card-color: #f43f5e;">
+        <div class="kpi-card" style="--card-color: #e11d48;">
           <div class="kpi-title">
             <span>Discrepancies Detected</span>
-            <i data-lucide="alert-triangle" style="width:16px; height:16px; color:#f87171;"></i>
+            <i data-lucide="alert-triangle" style="width:16px; height:16px; color:#e11d48;"></i>
           </div>
-          <div class="kpi-value" style="color:#f87171;">18</div>
+          <div class="kpi-value" style="color:#e11d48;">18</div>
           <div class="kpi-sub">
             <span>29.0% exception rate · 0 unexplained</span>
           </div>
         </div>
 
-        <div class="kpi-card" style="--card-color: #8b5cf6;">
+        <div class="kpi-card" style="--card-color: #7c3aed;">
           <div class="kpi-title">
             <span>Projected Monthly Loss</span>
-            <i data-lucide="trending-up" style="width:16px; height:16px; color:#a78bfa;"></i>
+            <i data-lucide="trending-up" style="width:16px; height:16px; color:#7c3aed;"></i>
           </div>
-          <div class="kpi-value" style="color:#a78bfa;">₹3,879.50</div>
+          <div class="kpi-value" style="color:#7c3aed;">₹3,879.50</div>
           <div class="kpi-sub">
             <span>Scaled x10.0 from ₹387.95 batch delta</span>
           </div>
@@ -890,12 +1023,12 @@
       <div class="section-header">
         <div>
           <h2 class="section-title">
-            <i data-lucide="search" style="color: #60a5fa;"></i>
+            <i data-lucide="search" style="color: #2563eb;"></i>
             <span>Root-Cause Detective Engine</span>
           </h2>
           <p class="section-subtitle">Systemic pattern detection across 18 exceptions using coverage-gated promotion rule</p>
         </div>
-        <div class="status-pill" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.25); color: #93c5fd;">
+        <div class="status-pill" style="background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8;">
           <span>Promotion Bar: Support ≥ 2 · Coverage > 50% · Sign Consistent</span>
         </div>
       </div>
@@ -988,7 +1121,7 @@
               <span class="verdict-tag pattern">○ POSSIBLE PATTERN</span>
               <span class="confidence-tag medium">MEDIUM</span>
             </div>
-            <div style="font-weight:700; font-size:0.95rem; margin-bottom:6px;">Rounding Convention Truncation Drift</div>
+            <div style="font-weight:700; font-size:0.95rem; margin-bottom:6px; color:var(--text-primary);">Rounding Convention Truncation Drift</div>
             <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px;">3 exceptions (16.7% coverage) · Negative 1-paise delta on PLN_STD netbanking transactions.</p>
             <div class="action-box" style="padding:8px 12px; margin:0;">
               <div class="action-text" style="font-size:0.78rem;">Check rounding mode: expected Indian half-up, but truncation applied.</div>
@@ -1001,7 +1134,7 @@
               <span class="verdict-tag pattern">○ POSSIBLE PATTERN</span>
               <span class="confidence-tag low">LOW</span>
             </div>
-            <div style="font-weight:700; font-size:0.95rem; margin-bottom:6px;">Refund Fee Not Credited Back</div>
+            <div style="font-weight:700; font-size:0.95rem; margin-bottom:6px; color:var(--text-primary);">Refund Fee Not Credited Back</div>
             <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px;">2 refund transactions on PLN_STD settled without reversing original platform fee.</p>
             <div class="action-box" style="padding:8px 12px; margin:0;">
               <div class="action-text" style="font-size:0.78rem;">Confirm refund fee-reversal step configuration on PLN_STD.</div>
@@ -1087,7 +1220,7 @@
       <div class="section-header">
         <div>
           <h2 class="section-title">
-            <i data-lucide="award" style="color: #10b981;"></i>
+            <i data-lucide="award" style="color: #059669;"></i>
             <span>Statistical Validation & Throughput Benchmarks</span>
           </h2>
           <p class="section-subtitle">Empirical evidence from 200 independent test batches and 5,000-record stress tests</p>
@@ -1095,47 +1228,47 @@
       </div>
 
       <div class="kpi-grid">
-        <div class="kpi-card" style="--card-color: #10b981;">
+        <div class="kpi-card" style="--card-color: #059669;">
           <div class="kpi-title"><span>False Positive Rate</span></div>
-          <div class="kpi-value" style="color:#34d399;">0.0%</div>
+          <div class="kpi-value" style="color:#059669;">0.0%</div>
           <div class="kpi-sub">0 / 100 unrelated noise batches promoted</div>
         </div>
 
-        <div class="kpi-card" style="--card-color: #3b82f6;">
+        <div class="kpi-card" style="--card-color: #2563eb;">
           <div class="kpi-title"><span>Systemic Recall Rate</span></div>
-          <div class="kpi-value" style="color:#60a5fa;">100.0%</div>
+          <div class="kpi-value" style="color:#2563eb;">100.0%</div>
           <div class="kpi-sub">100 / 100 injected systemic causes detected</div>
         </div>
 
-        <div class="kpi-card" style="--card-color: #8b5cf6;">
+        <div class="kpi-card" style="--card-color: #7c3aed;">
           <div class="kpi-title"><span>Single-Core Speed</span></div>
-          <div class="kpi-value" style="color:#a78bfa;">11,329.6</div>
+          <div class="kpi-value" style="color:#7c3aed;">11,329.6</div>
           <div class="kpi-sub">paired records / second (< 455ms for 5k)</div>
         </div>
 
-        <div class="kpi-card" style="--card-color: #06b6d4;">
+        <div class="kpi-card" style="--card-color: #0891b2;">
           <div class="kpi-title"><span>Peak RAM Footprint</span></div>
-          <div class="kpi-value" style="color:#38bdf8;">3.39 MB</div>
+          <div class="kpi-value" style="color:#0891b2;">3.39 MB</div>
           <div class="kpi-sub">zero float memory overhead</div>
         </div>
       </div>
 
       <div class="chart-card" style="margin-bottom: 24px;">
         <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
-          <i data-lucide="binary" style="color:#60a5fa;"></i>
+          <i data-lucide="binary" style="color:#2563eb;"></i>
           The Banker's Rounding vs. Indian Half-Up Rounding Proof
         </h3>
         <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
-          Python's built-in <code style="font-family:var(--font-mono); color:#f87171;">round()</code> uses Banker's Rounding (round-half-to-even), where <code style="font-family:var(--font-mono);">round(0.5) = 0</code> and <code style="font-family:var(--font-mono);">round(1.5) = 2</code>. Indian financial accounting standards strictly mandate <strong>Half-Up Rounding</strong> (<code style="font-family:var(--font-mono); color:#34d399;">ROUND_HALF_UP</code>).
+          Python's built-in <code style="font-family:var(--font-mono); color:#e11d48;">round()</code> uses Banker's Rounding (round-half-to-even), where <code style="font-family:var(--font-mono);">round(0.5) = 0</code> and <code style="font-family:var(--font-mono);">round(1.5) = 2</code>. Indian financial accounting standards strictly mandate <strong>Half-Up Rounding</strong> (<code style="font-family:var(--font-mono); color:#059669;">ROUND_HALF_UP</code>).
         </p>
-        <div style="background: rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:10px; padding:16px; font-family:var(--font-mono); font-size:0.85rem;">
-          <div style="color:#94a3b8; margin-bottom:6px;"># Anchor Transaction Case Study (₹1,337.49 @ 200 bps MDR):</div>
+        <div style="background: var(--bg-card-hover); border:1px solid var(--border-subtle); border-radius:10px; padding:16px; font-family:var(--font-mono); font-size:0.85rem;">
+          <div style="color:var(--text-muted); margin-bottom:6px;"># Anchor Transaction Case Study (₹1,337.49 @ 200 bps MDR):</div>
           <div>Gross Amount = <strong>133,749 paise</strong> (₹1,337.49)</div>
           <div>Platform Fee = 133,749 × 200 / 10,000 = 2,674.98 paise → <strong>2,675 paise</strong> (₹26.75)</div>
           <div>18% GST Base = 2,675 × 1,800 / 10,000 = <strong>481.50 paise</strong></div>
           <div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border-subtle);">
-            <span style="color:#f87171;">❌ Banker's Rounding (even): 481.50 → 481 paise (₹4.81)</span><br>
-            <span style="color:#34d399;">✅ Ledgerscope Half-Up: 481.50 → 482 paise (₹4.82) [MATCHED TO THE EXACT PAISE]</span>
+            <span style="color:#e11d48;">❌ Banker's Rounding (even): 481.50 → 481 paise (₹4.81)</span><br>
+            <span style="color:#059669;">✅ Ledgerscope Half-Up: 481.50 → 482 paise (₹4.82) [MATCHED TO THE EXACT PAISE]</span>
           </div>
         </div>
       </div>
@@ -1159,7 +1292,7 @@
               <td><span class="code-badge">E01</span></td>
               <td><strong>FEE_RATE_MISMATCH</strong></td>
               <td>Implied fee rate differs from plan rate by &gt; 1 basis point</td>
-              <td style="color:#34d399;">Active (10 occurrences)</td>
+              <td style="color:#059669; font-weight:600;">Active (10 occurrences)</td>
             </tr>
             <tr>
               <td><span class="code-badge">E02</span></td>
@@ -1171,25 +1304,25 @@
               <td><span class="code-badge">E03</span></td>
               <td><strong>GST_BASE_MISMATCH</strong></td>
               <td>18% GST was calculated on Gross Transaction amount rather than Platform Fee</td>
-              <td style="color:#34d399;">Active (2 occurrences)</td>
+              <td style="color:#059669; font-weight:600;">Active (2 occurrences)</td>
             </tr>
             <tr>
               <td><span class="code-badge">E04</span></td>
               <td><strong>ROUNDING_DRIFT</strong></td>
               <td>|Total Delta| ≤ 2 paise and rates are otherwise mathematically correct</td>
-              <td style="color:#34d399;">Active (3 occurrences)</td>
+              <td style="color:#059669; font-weight:600;">Active (3 occurrences)</td>
             </tr>
             <tr>
               <td><span class="code-badge">E05</span></td>
               <td><strong>MISSING_TAX_LINE</strong></td>
               <td>Settlement record is missing the tax line entirely while a fee was deducted</td>
-              <td style="color:#34d399;">Active (1 occurrence)</td>
+              <td style="color:#059669; font-weight:600;">Active (1 occurrence)</td>
             </tr>
             <tr>
               <td><span class="code-badge">E06</span></td>
               <td><strong>REFUND_FEE_NOT_REVERSED</strong></td>
               <td>Transaction is a refund, but settlement failed to reverse/credit back the original fee</td>
-              <td style="color:#34d399;">Active (2 occurrences)</td>
+              <td style="color:#059669; font-weight:600;">Active (2 occurrences)</td>
             </tr>
             <tr>
               <td><span class="code-badge">E07</span></td>
@@ -1207,7 +1340,7 @@
               <td><span class="code-badge">E09</span></td>
               <td><strong>UNEXPLAINED</strong></td>
               <td>Residual discrepancy — always reported, never suppressed</td>
-              <td style="color:#34d399;">0 in Current Batch</td>
+              <td style="color:#059669; font-weight:600;">0 in Current Batch</td>
             </tr>
           </tbody>
         </table>
@@ -1240,6 +1373,27 @@
   </footer>
 
   <script>
+    // Theme state
+    let isDark = false;
+
+    function toggleTheme() {
+      isDark = !isDark;
+      document.documentElement.classList.toggle('dark', isDark);
+      
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('themeText');
+      
+      if (isDark) {
+        themeIcon.setAttribute('data-lucide', 'moon');
+        themeText.textContent = 'Dark';
+      } else {
+        themeIcon.setAttribute('data-lucide', 'sun');
+        themeText.textContent = 'Light';
+      }
+      lucide.createIcons();
+      updateChartThemes();
+    }
+
     // Embedded real batch data
     const BATCH_RESULTS = [
       // 44 clean matched rows sample (represented efficiently)
@@ -1363,6 +1517,8 @@
 
     let currentFilter = 'ALL';
     let currentSearch = '';
+    let categoryChartInstance = null;
+    let impactChartInstance = null;
 
     // Initialize UI
     document.addEventListener('DOMContentLoaded', () => {
@@ -1459,27 +1615,27 @@
       const body = document.getElementById('modalBody');
       body.innerHTML = `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-          <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--border-subtle);">
-            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Gross Amount</div>
-            <div style="font-size:1.15rem; font-weight:800; font-family:var(--font-mono);">${formatINR(r.gross_paise)}</div>
+          <div style="background:var(--bg-card-hover); padding:12px; border-radius:8px; border:1px solid var(--border-subtle);">
+            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Gross Amount</div>
+            <div style="font-size:1.25rem; font-weight:800; font-family:var(--font-mono); color:var(--text-primary);">${formatINR(r.gross_paise)}</div>
             <div style="font-size:0.75rem; color:var(--text-secondary);">${r.gross_paise} paise</div>
           </div>
-          <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--border-subtle);">
-            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Fee Plan & Mode</div>
-            <div style="font-size:1.15rem; font-weight:800;">${r.plan}</div>
+          <div style="background:var(--bg-card-hover); padding:12px; border-radius:8px; border:1px solid var(--border-subtle);">
+            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Fee Plan & Mode</div>
+            <div style="font-size:1.15rem; font-weight:800; color:var(--text-primary);">${r.plan}</div>
             <div style="font-size:0.75rem; color:var(--text-secondary);">${r.method.toUpperCase()} ${r.network ? `· ${r.network}` : ''}</div>
           </div>
         </div>
 
-        <div style="background:rgba(0,0,0,0.4); border:1px solid var(--border-subtle); border-radius:10px; padding:16px; font-family:var(--font-mono); font-size:0.82rem; margin-bottom:16px;">
-          <div style="color:#60a5fa; font-weight:700; margin-bottom:8px;">Exact Integer Paise Computation Audit:</div>
+        <div style="background:var(--bg-base); border:1px solid var(--border-subtle); border-radius:10px; padding:16px; font-family:var(--font-mono); font-size:0.82rem; margin-bottom:16px;">
+          <div style="color:#2563eb; font-weight:700; margin-bottom:8px;">Exact Integer Paise Computation Audit:</div>
           <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
             <span>Expected Fee:</span>
             <span><strong>${r.exp_fee_p}p</strong> (${formatINR(r.exp_fee_p)})</span>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
             <span>Actual Settled Fee:</span>
-            <span style="color:${r.fee_delta !== 0 ? '#f87171' : '#34d399'};"><strong>${r.act_fee_p}p</strong> (${formatINR(r.act_fee_p)})</span>
+            <span style="color:${r.fee_delta !== 0 ? '#e11d48' : '#059669'};"><strong>${r.act_fee_p}p</strong> (${formatINR(r.act_fee_p)})</span>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
             <span>Expected 18% GST:</span>
@@ -1487,17 +1643,17 @@
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
             <span>Actual Settled GST:</span>
-            <span style="color:${r.tax_delta !== 0 ? '#f87171' : '#34d399'};"><strong>${r.act_tax_p !== null ? r.act_tax_p + 'p' : 'None'}</strong> (${formatINR(r.act_tax_p)})</span>
+            <span style="color:${r.tax_delta !== 0 ? '#e11d48' : '#059669'};"><strong>${r.act_tax_p !== null ? r.act_tax_p + 'p' : 'None'}</strong> (${formatINR(r.act_tax_p)})</span>
           </div>
           <div style="padding-top:8px; border-top:1px dashed var(--border-subtle); display:flex; justify-content:space-between; font-weight:700;">
             <span>Net Discrepancy (Delta):</span>
-            <span style="color:${r.total_delta !== 0 ? '#f87171' : '#34d399'};">${r.total_delta > 0 ? '+' : ''}${formatINR(r.total_delta)}</span>
+            <span style="color:${r.total_delta !== 0 ? '#e11d48' : '#059669'};">${r.total_delta > 0 ? '+' : ''}${formatINR(r.total_delta)}</span>
           </div>
         </div>
 
-        <div style="background:rgba(59,130,246,0.08); border-left:3px solid #3b82f6; padding:12px; border-radius:0 8px 8px 0; font-size:0.84rem;">
-          <div style="font-weight:700; color:#93c5fd; margin-bottom:2px;">Classifier Diagnosis Rule:</div>
-          <div style="color:#e2e8f0;">${r.rule}</div>
+        <div style="background:#eff6ff; border-left:4px solid #2563eb; padding:12px; border-radius:0 8px 8px 0; font-size:0.84rem; border:1px solid #dbeafe; border-left-width:4px;">
+          <div style="font-weight:700; color:#1e40af; margin-bottom:2px;">Classifier Diagnosis Rule:</div>
+          <div style="color:#1e293b;">${r.rule}</div>
         </div>
       `;
 
@@ -1550,16 +1706,20 @@
     }
 
     function initCharts() {
+      const textColor = isDark ? '#94a3b8' : '#475569';
+      const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
       // Category Breakdown Donut Chart
       const catCtx = document.getElementById('categoryChart').getContext('2d');
-      new Chart(catCtx, {
+      categoryChartInstance = new Chart(catCtx, {
         type: 'doughnut',
         data: {
           labels: ['E01 Rate Mismatch (10)', 'E04 Rounding Drift (3)', 'E03 GST Base Error (2)', 'E06 Refund Fee (2)', 'E05 Missing Tax (1)'],
           datasets: [{
             data: [10, 3, 2, 2, 1],
-            backgroundColor: ['#3b82f6', '#8b5cf6', '#f43f5e', '#f59e0b', '#06b6d4'],
-            borderWidth: 0,
+            backgroundColor: ['#2563eb', '#7c3aed', '#e11d48', '#d97706', '#0891b2'],
+            borderWidth: 2,
+            borderColor: isDark ? '#0f172a' : '#ffffff',
             hoverOffset: 6
           }]
         },
@@ -1570,8 +1730,8 @@
             legend: {
               position: 'right',
               labels: {
-                color: '#94a3b8',
-                font: { family: 'Plus Jakarta Sans', size: 11 },
+                color: textColor,
+                font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' },
                 boxWidth: 12,
                 padding: 14
               }
@@ -1583,14 +1743,14 @@
 
       // Monthly Impact Bar Chart
       const impCtx = document.getElementById('impactChart').getContext('2d');
-      new Chart(impCtx, {
+      impactChartInstance = new Chart(impCtx, {
         type: 'bar',
         data: {
           labels: ['RC_004 (GST Base)', 'RC_001 (Netbanking)', 'RC_002 (Rounding)', 'RC_003 (Refund)'],
           datasets: [{
             label: 'Projected Monthly Loss (₹)',
             data: [3528.00, 333.20, 0.30, 0.00],
-            backgroundColor: ['rgba(244, 63, 94, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(245, 158, 11, 0.8)'],
+            backgroundColor: ['#e11d48', '#2563eb', '#7c3aed', '#d97706'],
             borderRadius: 6,
           }]
         },
@@ -1602,20 +1762,28 @@
           },
           scales: {
             x: {
-              ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 10 } },
+              ticks: { color: textColor, font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } },
               grid: { display: false }
             },
             y: {
               ticks: {
-                color: '#94a3b8',
-                font: { family: 'JetBrains Mono', size: 10 },
+                color: textColor,
+                font: { family: 'JetBrains Mono', size: 10, weight: '600' },
                 callback: v => '₹' + v
               },
-              grid: { color: 'rgba(255,255,255,0.05)' }
+              grid: { color: gridColor }
             }
           }
         }
       });
+    }
+
+    function updateChartThemes() {
+      if (categoryChartInstance && impactChartInstance) {
+        categoryChartInstance.destroy();
+        impactChartInstance.destroy();
+        initCharts();
+      }
     }
   </script>
 </body>
