@@ -1,6 +1,6 @@
 {
   "batch_id": "STL_2026_08",
-  "generated_at": "2026-08-22T06:12:07.274347+00:00",
+  "generated_at": "2026-08-23T03:31:29.427935+00:00",
   "summary": {
     "total_records": 62,
     "matched": 44,
@@ -1053,40 +1053,115 @@
       "verdict": "possible_pattern \u2014 insufficient evidence",
       "cause_type": "ROUNDING_CONVENTION_MISMATCH",
       "shared_attributes": {
+        "exception_code": "E04",
+        "payment_method": "netbanking",
         "fee_plan_id": "PLN_STD",
+        "card_network": null,
         "is_international": false,
+        "is_refund": false,
         "settlement_batch": "STL_2026_08"
       },
       "affected_txn_ids": [
         "TXN_0055",
         "TXN_0056",
-        "TXN_0057",
-        "TXN_0058",
-        "TXN_0059",
-        "TXN_0060",
-        "TXN_0061",
-        "TXN_0062"
+        "TXN_0057"
       ],
-      "support_count": 8,
-      "coverage_ratio": 0.444,
+      "support_count": 3,
+      "coverage_ratio": 0.167,
       "deviation_summary": {
         "sign": "negative",
-        "mean_deviation_ratio": 1.84946,
-        "coefficient_of_variation": 1.7088,
-        "consistent": false
+        "mean_deviation_ratio": -0.00032,
+        "coefficient_of_variation": 0.0,
+        "consistent": true
       },
       "rule_id": "RC-RULE-02: shared attribute + sign consistency + coverage>0.5",
-      "confidence": "low",
-      "observed_batch_impact_paise": 35463,
+      "confidence": "medium",
+      "observed_batch_impact_paise": 3,
       "projected_monthly_impact": {
-        "value_paise": 354630,
+        "value_paise": 30,
         "basis": "ASSUMPTION - batch spans 3 day(s); scaled x10.0 to a 30-day month",
         "scaling_factor": 10.0,
         "is_estimate": true
       },
       "controller_action": "Monitor across the next 2-3 settlement batches before treating this as confirmed. If the pattern persists: Check the rounding mode used in the settlement system \u2014 expected half-up (Indian financial standard), but truncation appears to be applied on plan PLN_STD.",
       "finding_id": "RC_002",
-      "narration": "8 exceptions share {'fee_plan_id': 'PLN_STD', 'is_international': False, 'settlement_batch': 'STL_2026_08'}, covering 44% of exceptions in this batch \u2014 below the threshold to confirm a cause. Monitor across the next 2-3 settlement batches before treating this as confirmed. If the pattern persists: Check the rounding mode used in the settlement system \u2014 expected half-up (Indian financial standard), but truncation appears to be applied on plan PLN_STD.",
+      "narration": "3 exceptions share {'exception_code': 'E04', 'payment_method': 'netbanking', 'fee_plan_id': 'PLN_STD', 'card_network': None, 'is_international': False, 'is_refund': False, 'settlement_batch': 'STL_2026_08'}, covering 17% of exceptions in this batch \u2014 below the threshold to confirm a cause. Monitor across the next 2-3 settlement batches before treating this as confirmed. If the pattern persists: Check the rounding mode used in the settlement system \u2014 expected half-up (Indian financial standard), but truncation appears to be applied on plan PLN_STD.",
+      "narration_source": "template"
+    },
+    {
+      "verdict": "possible_pattern \u2014 insufficient evidence",
+      "cause_type": "REFUND_FEE_NOT_REVERSED",
+      "shared_attributes": {
+        "is_refund": true,
+        "exception_code": "E06",
+        "payment_method": "card",
+        "card_network": "visa",
+        "fee_plan_id": "PLN_STD",
+        "is_international": false,
+        "settlement_batch": "STL_2026_08"
+      },
+      "affected_txn_ids": [
+        "TXN_0060",
+        "TXN_0061"
+      ],
+      "support_count": 2,
+      "coverage_ratio": 0.111,
+      "deviation_summary": {
+        "sign": "negative",
+        "mean_deviation_ratio": 0.0,
+        "coefficient_of_variation": 0.0,
+        "consistent": false
+      },
+      "rule_id": "RC-RULE-02: shared attribute + sign consistency + coverage>0.5",
+      "confidence": "low",
+      "observed_batch_impact_paise": 0,
+      "projected_monthly_impact": {
+        "value_paise": 0,
+        "basis": "ASSUMPTION - batch spans 3 day(s); scaled x10.0 to a 30-day month",
+        "scaling_factor": 10.0,
+        "is_estimate": true
+      },
+      "controller_action": "Monitor across the next 2-3 settlement batches before treating this as confirmed. If the pattern persists: Confirm whether the refund fee-reversal step is configured on plan PLN_STD \u2014 refund transactions are being settled without crediting back the original platform fee.",
+      "finding_id": "RC_003",
+      "narration": "2 exceptions share {'is_refund': True, 'exception_code': 'E06', 'payment_method': 'card', 'card_network': 'visa', 'fee_plan_id': 'PLN_STD', 'is_international': False, 'settlement_batch': 'STL_2026_08'}, covering 11% of exceptions in this batch \u2014 below the threshold to confirm a cause. Monitor across the next 2-3 settlement batches before treating this as confirmed. If the pattern persists: Confirm whether the refund fee-reversal step is configured on plan PLN_STD \u2014 refund transactions are being settled without crediting back the original platform fee.",
+      "narration_source": "template"
+    },
+    {
+      "verdict": "possible_pattern \u2014 insufficient evidence",
+      "cause_type": "GST_BASE_ERROR",
+      "shared_attributes": {
+        "exception_code": "E03",
+        "payment_method": "card",
+        "is_refund": false,
+        "card_network": "visa",
+        "fee_plan_id": "PLN_STD",
+        "is_international": false,
+        "settlement_batch": "STL_2026_08"
+      },
+      "affected_txn_ids": [
+        "TXN_0058",
+        "TXN_0059"
+      ],
+      "support_count": 2,
+      "coverage_ratio": 0.111,
+      "deviation_summary": {
+        "sign": "positive",
+        "mean_deviation_ratio": 7.47458,
+        "coefficient_of_variation": 0.0,
+        "consistent": true
+      },
+      "rule_id": "RC-RULE-02: shared attribute + sign consistency + coverage>0.5",
+      "confidence": "low",
+      "observed_batch_impact_paise": 35280,
+      "projected_monthly_impact": {
+        "value_paise": 352800,
+        "basis": "ASSUMPTION - batch spans 3 day(s); scaled x10.0 to a 30-day month",
+        "scaling_factor": 10.0,
+        "is_estimate": true
+      },
+      "controller_action": "Monitor across the next 2-3 settlement batches before treating this as confirmed. If the pattern persists: Review the GST computation logic for card transactions on plan PLN_STD \u2014 tax appears to be computed on the gross transaction amount rather than on the platform fee.",
+      "finding_id": "RC_004",
+      "narration": "2 exceptions share {'exception_code': 'E03', 'payment_method': 'card', 'is_refund': False, 'card_network': 'visa', 'fee_plan_id': 'PLN_STD', 'is_international': False, 'settlement_batch': 'STL_2026_08'}, covering 11% of exceptions in this batch \u2014 below the threshold to confirm a cause. Monitor across the next 2-3 settlement batches before treating this as confirmed. If the pattern persists: Review the GST computation logic for card transactions on plan PLN_STD \u2014 tax appears to be computed on the gross transaction amount rather than on the platform fee.",
       "narration_source": "template"
     }
   ]

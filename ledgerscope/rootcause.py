@@ -34,11 +34,7 @@ def _informative_attr_sets(exceptions, attr_sets):
     across the whole exception population. A group where every single
     exception shares the same value carries zero discriminating information —
     it cannot be a cause, because it doesn't separate affected from
-    unaffected rows. This is the actual source of the mega-groups
-    (is_international=False, settlement_batch=X when there's only one batch,
-    etc.) that were blocking real findings and had to be worked around with
-    increasingly special-cased subsumption logic. Filtering here removes the
-    problem at the source instead of patching around it downstream.
+    unaffected rows. This removes mega-groups at the source.
     """
     informative = []
     for attrs in attr_sets:
@@ -143,6 +139,7 @@ def _dedupe_identical_members(cands):
 
         base = max(group, key=lambda c: (
             1 if c["verdict"] == "likely_root_cause" else 0,
+            1 if "exception_code" in c["shared_attributes"] else 0,
             len(c["shared_attributes"]),
             str(sorted(c["shared_attributes"].items())),
         ))
@@ -158,23 +155,41 @@ def _dedupe_identical_members(cands):
 
 
 def _drop_subsumed(cands):
-    """If a possible_pattern finding's transactions are mostly (>50%) already
-    explained by a finding that was kept, drop it — it's not adding new
-    information beyond a cluster already reported. Promoted (likely_root_cause)
-    findings are sorted first so an unpromoted broad group does not subsume a
-    true confirmed cause."""
-    cands.sort(key=lambda c: (
+    """Standard overlap-based pruning, with one protected exception:
+    exception_code-keyed findings are never dropped for coincidental overlap
+    with a broader, less diagnostic attribute grouping. exception_code is not
+    a correlative signal like fee_plan_id or payment_method - it's the
+    deterministic diagnosis classify.py already computed. Letting a vaguer,
+    coincidentally-shared configuration attribute (e.g. "everyone not on the
+    special plan defaults to PLN_STD") bury that diagnosis defeats the point
+    of running classify.py at all.
+    """
+    protected = [c for c in cands if "exception_code" in c["shared_attributes"]]
+
+    rest = [c for c in cands if c not in protected]
+    rest.sort(key=lambda c: (
         0 if c["verdict"] == "likely_root_cause" else 1,
         -c["coverage_ratio"],
-        -c["support_count"],
+        -c["support_count"]
     ))
-    kept, claimed = [], set()
-    for c in cands:
+
+    kept = list(protected)
+    claimed = set()
+    for c in protected:
+        claimed |= set(c["affected_txn_ids"])
+
+    for c in rest:
         ids = set(c["affected_txn_ids"])
         if len(ids & claimed) / len(ids) > 0.5:
             continue
         kept.append(c)
         claimed |= ids
+
+    kept.sort(key=lambda c: (
+        0 if c["verdict"] == "likely_root_cause" else 1,
+        -c["coverage_ratio"],
+        -c["support_count"]
+    ))
     return kept
 
 

@@ -64,3 +64,24 @@ When test fixes require stacking case-by-case exemptions on an algorithm, stop a
 **Root cause**: The hallucination guard correctly fired and returned the template. But the test assertion was checking for the digit substring `47` in the output string, which appears embedded in `124730`.
 **Fix**: Changed assertion to check for the specific hallucinated phrase `"affects 47 transactions"` and `"99.9%"` instead of bare digits, and added a positive assertion that the real support_count appears.
 **Lesson**: When testing for absence of specific values, check for the *exact phrase* not bare digit substrings, since numbers like `124730` contain common small digit sequences.
+
+---
+
+## Failure 5 — 2026-08-23: Conflation of Distinct Causes under Default Plan (RC_002 Subsumption Bug)
+
+**Step**: 8 & 12 (rootcause analysis / end-to-end report inspection)
+**What broke**:
+In the 62-record synthetic dataset, 8 residual exceptions on the default fee plan `PLN_STD` (spanning 2 E03 GST errors, 3 E04 rounding errors, 1 E05 missing tax, and 2 E06 refund errors) were merged into a single confusing finding `RC_002` labeled `fee_plan_id=PLN_STD` with `direction inconsistent` and `CV 1.709`. This broad, low-quality grouping claimed all 8 transactions and suppressed the smaller, genuinely diagnostic `exception_code`-keyed groupings underneath it.
+
+**Root cause**:
+1. **Fixture Homogeneity Masked the Problem**: Unit test fixtures like `_build_other_exceptions` used only a single fee plan (`PLN_STD`) across all exceptions. As a result, `_informative_attr_sets()` stripped `fee_plan_id` out in unit tests (since it had only 1 distinct value), so the conflation never occurred in tests. In the real dataset, however, two fee plans existed (`PLN_ENT_2024` and `PLN_STD`), giving `fee_plan_id=PLN_STD` high coverage across the non-enterprise records.
+2. **Greedy Coverage Pruning Buried Ground Truth**: `exception_code` is a deterministic diagnosis produced by `classify.py`, whereas attributes like `fee_plan_id` are correlative configuration fields. Greedy "highest coverage wins" pruning allowed coincidental shared membership on the default plan to bury the deterministic exception codes.
+
+**Fix**:
+1. Protected `exception_code` in `_drop_subsumed`: Deterministic exception code findings are never dropped for coincidental overlap with broader configuration attributes.
+2. Added `test_heterogeneous_default_plan_does_not_merge_distinct_causes` in `tests/test_rootcause.py`: Uses a realistic fixture with two fee plans and enforces that disparate exception codes under a default plan remain individually visible.
+3. Updated `_dedupe_identical_members` to merge attributes across identical member sets so findings retain full context (`fee_plan_id`, `payment_method`, `exception_code`).
+
+**Lesson**:
+Deterministic classifications computed by earlier pipeline stages represent ground truth, not correlative hypotheses. Pruning must protect diagnostic ground truth from being swallowed by coincidental configuration attributes. Unit tests must also test heterogeneous multi-group populations to avoid artificial fixture bias.
+

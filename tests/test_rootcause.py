@@ -283,6 +283,64 @@ def test_finding_count_is_reasonable():
     )
 
 
+def test_heterogeneous_default_plan_does_not_merge_distinct_causes():
+    """Regression test for the RC_002 bug: a batch where exceptions split
+    across TWO fee plans (not one, unlike the other fixtures in this file) --
+    one plan hosting a real systemic cluster, the other hosting several
+    small, genuinely unrelated exception types that only coincidentally share
+    the default plan. The unrelated types must NOT be merged into one
+    possible_pattern block under the coincidental fee_plan_id label -- each
+    exception_code must still be individually visible.
+    """
+    from ledgerscope.rootcause import detect
+
+    cluster = _build_netbanking_cluster(count=10)  # fee_plan_id=PLN_ENT_2024
+
+    # Build a heterogeneous "everything else" group that shares PLN_STD only
+    # coincidentally -- four genuinely different exception_codes, mixed sign.
+    def _mixed(code, count, sign, mag):
+        return [
+            Exc(txn_id=f"TXN_{code}_{i:03d}", payment_method="card", card_network="visa",
+                fee_plan_id="PLN_STD", is_international=False, is_refund=(code == "E06"),
+                settlement_batch="STL_2026_08", exception_code=code,
+                deviation_ratio=sign * mag, total_delta_paise=int(sign * mag * 10000))
+            for i in range(count)
+        ]
+
+    others = (_mixed("E03", 2, +1, 0.94) + _mixed("E04", 3, -1, 0.0003)
+              + _mixed("E05", 1, +1, 0.5) + _mixed("E06", 2, -1, 0.02))
+
+    exceptions = cluster + others
+    findings = detect(exceptions, batch_span_days=3)
+
+    # The netbanking cluster must still be promoted, exactly as before.
+    assert any(f["verdict"] == "likely_root_cause" for f in findings)
+
+    # E03 and E06 (support=2 each) must survive as their OWN findings --
+    # not merged into a single fee_plan_id=PLN_STD block.
+    codes_present = {f["shared_attributes"].get("exception_code") for f in findings}
+    assert "E03" in codes_present, (
+        f"E03 was merged away into a broader grouping. Findings: "
+        f"{[f['shared_attributes'] for f in findings]}"
+    )
+    assert "E06" in codes_present, (
+        f"E06 was merged away into a broader grouping. Findings: "
+        f"{[f['shared_attributes'] for f in findings]}"
+    )
+
+    # No single finding should claim members from more than one exception_code
+    # unless it's the promoted cluster (which is legitimately multi-attribute
+    # but single exception_code=E01 underneath).
+    for f in findings:
+        member_codes = {e.exception_code for e in exceptions
+                        if e.txn_id in f["affected_txn_ids"]}
+        assert len(member_codes) == 1, (
+            f"Finding mixes exception_code values {member_codes} under one "
+            f"block: {f['shared_attributes']} -- this is exactly the RC_002 "
+            f"conflation bug."
+        )
+
+
 # ---------------------------------------------------------------------------
 # Additional sanity tests
 # ---------------------------------------------------------------------------

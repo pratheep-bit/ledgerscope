@@ -151,10 +151,11 @@ Projected monthly impact   ₹333.20  ← ASSUMPTION - batch spans 3 day(s); sca
 pytest -v
 ```
 
-24 tests across 4 test files.
+26 tests across 4 test files:
 - `test_test1_rounding_half_up` — eye-checkable anchor: ₹1,337.49 at 200bps = fee 2675p, GST 482p (half-up from 481.5)
 - `test_test2_systemic_cluster_promoted` — 10 E01 exceptions (56% coverage) promoted to `likely_root_cause` with `high` confidence
 - `test_test3_weak_pattern_not_promoted` — 3/18 exceptions at 17% coverage must NOT be promoted to `likely_root_cause`
 - `test_test4_outliers_do_not_hijack` — 2 high-impact E03 outliers (11% coverage) cannot hijack the promoted cluster
-- `test_test5_deduplication_no_identical_member_sets` — deduplication guarantees no two findings share identical member sets and findings count is bounded
+- `test_no_duplicate_member_sets` & `test_finding_count_is_reasonable` — deduplication guarantees no two findings share identical member sets and finding counts remain compact
+- `test_heterogeneous_default_plan_does_not_merge_distinct_causes` — verifies that distinct exception codes under a shared default fee plan are not conflated and remain individually visible
 - `test_narrate_falls_back_on_hallucination` — hallucination guard actually fires and falls back to deterministic template
