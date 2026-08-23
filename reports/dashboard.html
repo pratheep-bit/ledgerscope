@@ -150,6 +150,21 @@
       font-size: 0.74rem;
       color: var(--ink-faint);
       margin-top: 1px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .razorpay-inline-logo {
+      height: 13px;
+      width: auto;
+      vertical-align: middle;
+      display: inline-block;
+    }
+
+    html.dark .razorpay-inline-logo {
+      filter: brightness(0) invert(0.95);
     }
 
     .header-meta {
@@ -1074,7 +1089,11 @@
         </div>
         <div>
           <div class="brand-name">Ledgerscope</div>
-          <div class="brand-line">Settlement reconciliation for Razorpay merchants</div>
+          <div class="brand-line">
+            <span>Settlement reconciliation for</span>
+            <img src="razorpay_logo.svg" alt="Razorpay" class="razorpay-inline-logo">
+            <span>merchants</span>
+          </div>
         </div>
       </div>
       <div class="header-meta" id="headerMeta">
