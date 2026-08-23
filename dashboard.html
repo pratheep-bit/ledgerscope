@@ -1537,6 +1537,8 @@
         rest.forEach(code => pairWrap.appendChild(buildMiniFindingCard(code, STATS.byCode[code])));
         container.appendChild(pairWrap);
       }
+
+      lucide.createIcons();
     }
 
     function buildFindingCard(code, entry) {
@@ -1801,10 +1803,12 @@
 
     function copyText(btn, text) {
       navigator.clipboard.writeText(text).then(() => {
-        const original = btn.innerHTML;
         btn.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;"></i> Copied';
         lucide.createIcons();
-        setTimeout(() => { btn.innerHTML = original; lucide.createIcons(); }, 1400);
+        setTimeout(() => {
+          btn.innerHTML = '<i data-lucide="copy" style="width:11px;height:11px;"></i> Copy';
+          lucide.createIcons();
+        }, 1400);
       });
     }
 
@@ -1834,13 +1838,13 @@
        Init
        ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
       renderKpis();
       renderFindings();
       buildFilterChips();
       renderTable();
       renderTaxonomy();
       initCharts();
+      lucide.createIcons();
     });
   </script>
   <style>
