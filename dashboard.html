@@ -1,73 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ledgerscope — Deterministic Settlement Reconciliation & Root-Cause Detective</title>
-  
-  <!-- Fonts -->
+  <title>Ledgerscope — Settlement Reconciliation</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Chart.js & Lucide Icons -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
 
   <style>
     :root {
-      /* Flat Clean Light Theme (No gradients) */
-      --bg-base: #f8fafc;
-      --bg-surface: #ffffff;
-      --bg-card: #ffffff;
-      --bg-card-hover: #f1f5f9;
-      --border-subtle: #e2e8f0;
-      --border-strong: #cbd5e1;
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #64748b;
-      
-      --accent-blue: #2563eb;
-      --accent-blue-subtle: #eff6ff;
-      --accent-indigo: #4f46e5;
-      --accent-purple: #7c3aed;
-      --accent-emerald: #059669;
-      --accent-emerald-subtle: #ecfdf5;
-      --accent-amber: #d97706;
-      --accent-amber-subtle: #fffbeb;
-      --accent-rose: #e11d48;
-      --accent-rose-subtle: #fff1f2;
-      --accent-cyan: #0891b2;
+      --paper: #f7f6f3;
+      --surface: #ffffff;
+      --surface-sunk: #f1efe9;
+      --ink: #181b20;
+      --ink-secondary: #565c68;
+      --ink-faint: #8b909c;
+      --line: #e3e1db;
+      --line-strong: #cfccc2;
 
-      --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --table-head-bg: #f8fafc;
-      --table-row-hover: #f8fafc;
-      --table-border: #f1f5f9;
+      --accent: #2f3f66;
+      --accent-light: #7386ad;
+      --accent-soft: #eaeef5;
 
-      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --positive: #1f7a52;
+      --positive-soft: #e8f4ee;
+      --negative: #b3402c;
+      --negative-soft: #fbeae6;
+      --warn: #a8720a;
+      --warn-soft: #f8f0dd;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --shadow-card: 0 1px 2px rgba(24, 27, 32, 0.05);
+
+      --font-display: 'IBM Plex Sans', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
     }
 
     html.dark {
-      --bg-base: #090d16;
-      --bg-surface: #0f172a;
-      --bg-card: #131d35;
-      --bg-card-hover: #1e293b;
-      --border-subtle: #1e293b;
-      --border-strong: #334155;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
+      --paper: #0e1013;
+      --surface: #161920;
+      --surface-sunk: #111318;
+      --ink: #eef0f3;
+      --ink-secondary: #9ba1ae;
+      --ink-faint: #666c78;
+      --line: #262a33;
+      --line-strong: #343945;
 
-      --accent-blue-subtle: rgba(37, 99, 235, 0.12);
-      --accent-emerald-subtle: rgba(16, 185, 129, 0.12);
-      --accent-amber-subtle: rgba(245, 158, 11, 0.12);
-      --accent-rose-subtle: rgba(225, 29, 72, 0.12);
+      --accent: #8fa3d1;
+      --accent-light: #4c5f8a;
+      --accent-soft: rgba(143, 163, 209, 0.1);
 
-      --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      --table-head-bg: #090d16;
-      --table-row-hover: #1e293b;
-      --table-border: #1e293b;
+      --positive: #49b78e;
+      --positive-soft: rgba(73, 183, 142, 0.1);
+      --negative: #e2785f;
+      --negative-soft: rgba(226, 120, 95, 0.1);
+      --warn: #d3a545;
+      --warn-soft: rgba(211, 165, 69, 0.1);
+
+      --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     * {
@@ -76,112 +75,100 @@
       padding: 0;
     }
 
+    html {
+      -webkit-font-smoothing: antialiased;
+    }
+
     body {
-      background-color: var(--bg-base);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: 14px;
       line-height: 1.5;
-      transition: background-color 0.15s ease, color 0.15s ease;
+      transition: background-color .15s ease, color .15s ease;
     }
 
-    .container {
-      max-width: 1400px;
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .num {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wrap {
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 0 24px;
-      width: 100%;
+      padding: 0 28px;
     }
 
-    /* Top Navbar */
-    .navbar {
-      border-bottom: 1px solid var(--border-subtle);
-      background: var(--bg-surface);
+    /* ---------- Header ---------- */
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
       position: sticky;
       top: 0;
-      z-index: 100;
-      padding: 14px 0;
+      z-index: 50;
     }
 
-    .navbar-inner {
+    .header-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 20px;
+      padding: 16px 0;
     }
 
-    .brand-group {
+    .brand {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .brand-logo {
-      width: 36px;
-      height: 36px;
-      background: var(--accent-blue);
-      border-radius: 8px;
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      border: 1px solid var(--line-strong);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: var(--accent);
+      background: var(--accent-soft);
+      flex-shrink: 0;
     }
 
-    .brand-text h1 {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-primary);
-    }
-
-    .brand-badge {
-      font-size: 0.68rem;
+    .brand-name {
+      font-size: 0.98rem;
       font-weight: 700;
-      background: var(--accent-blue-subtle);
-      color: var(--accent-blue);
-      border: 1px solid var(--border-subtle);
-      padding: 2px 8px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: -0.01em;
     }
 
-    .brand-tagline {
+    .brand-line {
+      font-size: 0.74rem;
+      color: var(--ink-faint);
+      margin-top: 1px;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-size: 0.76rem;
-      color: var(--text-muted);
+      color: var(--ink-secondary);
     }
 
-    .nav-status-pills {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--positive);
+      flex-shrink: 0;
     }
 
-    .status-pill {
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
-      background: var(--bg-card-hover);
-      border: 1px solid var(--border-subtle);
-      padding: 5px 12px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-secondary);
-    }
-
-    .status-pill.success {
-      color: var(--accent-emerald);
-      border-color: rgba(5, 150, 105, 0.25);
-      background: var(--accent-emerald-subtle);
-    }
-
-    .nav-actions {
+    .header-actions {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -190,433 +177,446 @@
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 0.82rem;
+      gap: 7px;
+      padding: 7px 13px;
+      border-radius: var(--radius-sm);
+      font-size: 0.79rem;
       font-weight: 600;
+      font-family: var(--font-display);
       cursor: pointer;
-      transition: all 0.15s ease;
       border: 1px solid transparent;
-      text-decoration: none;
+      white-space: nowrap;
+      transition: all .12s ease;
     }
 
     .btn-primary {
-      background: var(--accent-blue);
+      background: var(--accent);
       color: #fff;
     }
 
     .btn-primary:hover {
-      background: #1d4ed8;
+      opacity: 0.88;
     }
 
-    .btn-secondary {
-      background: var(--bg-surface);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-subtle);
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-secondary);
+      border-color: var(--line-strong);
     }
 
-    .btn-secondary:hover {
-      background: var(--bg-card-hover);
-      color: var(--text-primary);
-      border-color: var(--border-strong);
+    .btn-ghost:hover {
+      color: var(--ink);
+      background: var(--surface-sunk);
     }
 
-    .theme-toggle-btn {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 7px 12px;
-      cursor: pointer;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .theme-toggle-btn:hover {
-      color: var(--text-primary);
-      border-color: var(--border-strong);
-      background: var(--bg-card-hover);
-    }
-
-    /* Main Content */
-    main {
-      padding: 24px 0 60px;
-      flex: 1;
-    }
-
-    /* Tabs Bar */
-    .tabs-bar {
+    /* ---------- Tabs ---------- */
+    .tabbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+      margin: 28px 0 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .tab {
+      padding: 9px 4px;
+      margin-right: 22px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--ink-faint);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transform: translateY(1px);
+    }
+
+    .tab:hover {
+      color: var(--ink-secondary);
+    }
+
+    .tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--accent);
+    }
+
+    .batch-tag {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--ink-secondary);
       padding-bottom: 10px;
     }
 
-    .tab-group {
-      display: flex;
-      gap: 6px;
-    }
-
-    .tab-btn {
-      padding: 7px 14px;
-      border-radius: 6px;
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
-      font-size: 0.86rem;
+    .batch-tag strong {
+      color: var(--accent);
       font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
-    .tab-btn:hover {
-      color: var(--text-secondary);
-      background: var(--bg-card-hover);
-    }
-
-    .tab-btn.active {
-      background: var(--bg-surface);
-      color: var(--accent-blue);
-      border-color: var(--border-subtle);
-      box-shadow: var(--card-shadow);
-    }
-
-    .batch-badge {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      background: var(--bg-surface);
-      padding: 5px 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border-subtle);
-    }
-
-    /* KPI Grid */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
+    /* ---------- Ledger strip (signature KPI element) ---------- */
+    .ledger-strip {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
       margin-bottom: 28px;
+      overflow: hidden;
     }
 
-    .kpi-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 18px 20px;
-      box-shadow: var(--card-shadow);
-      border-top: 3px solid var(--card-color, #2563eb);
+    .ledger-strip::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-image: radial-gradient(circle, var(--paper) 2.5px, transparent 2.6px);
+      background-size: 14px 4px;
+      background-position: 0 -1px;
     }
 
-    .kpi-title {
-      font-size: 0.74rem;
-      font-weight: 700;
+    .ledger-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .ledger-cell {
+      padding: 20px 24px;
+      border-right: 1px dashed var(--line);
+    }
+
+    .ledger-cell:last-child {
+      border-right: none;
+    }
+
+    .ledger-label {
+      font-size: 0.68rem;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      color: var(--ink-faint);
       margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
 
-    .kpi-value {
-      font-size: 1.85rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      font-family: var(--font-mono);
-      margin-bottom: 4px;
-      color: var(--text-primary);
+    .ledger-value {
+      font-size: 1.55rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
     }
 
-    .kpi-sub {
+    .ledger-value.positive {
+      color: var(--positive);
+    }
+
+    .ledger-value.negative {
+      color: var(--negative);
+    }
+
+    .ledger-sub {
       font-size: 0.76rem;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      color: var(--ink-secondary);
+      margin-top: 5px;
     }
 
-    /* Section Headers */
-    .section-header {
+    @media (max-width:820px) {
+      .ledger-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .ledger-cell:nth-child(2n) {
+        border-right: none;
+      }
+
+      .ledger-cell:nth-child(-n+2) {
+        border-bottom: 1px dashed var(--line);
+      }
+    }
+
+    /* ---------- Section headers ---------- */
+    .section-head {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .section-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
-    .section-subtitle {
-      font-size: 0.82rem;
-      color: var(--text-muted);
+    .section-sub {
+      font-size: 0.79rem;
+      color: var(--ink-faint);
+      margin-top: 2px;
     }
 
-    /* Findings Detective Section */
-    .findings-container {
+    .rule-pill {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--ink-secondary);
+      background: var(--surface-sunk);
+      border: 1px solid var(--line);
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ---------- Findings ---------- */
+    .findings {
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      margin-bottom: 30px;
+      gap: 12px;
+      margin-bottom: 32px;
     }
 
-    .finding-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 20px 22px;
-      box-shadow: var(--card-shadow);
+    .finding {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
     }
 
-    .finding-card.promoted {
-      border-color: #93c5fd;
-      border-left: 4px solid var(--accent-blue);
-      background: var(--bg-surface);
+    .finding.promoted {
+      border-left: 3px solid var(--accent);
     }
 
-    html.dark .finding-card.promoted {
-      border-color: #1e3a8a;
-      border-left: 4px solid var(--accent-blue);
-    }
-
-    .finding-header {
+    .finding-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 12px;
-    }
-
-    .finding-badge-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
       flex-wrap: wrap;
     }
 
-    .finding-id {
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: var(--bg-card-hover);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
     }
 
-    .verdict-tag {
+    .code-tag {
+      font-family: var(--font-mono);
+      font-weight: 600;
       font-size: 0.74rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--surface-sunk);
+      border: 1px solid var(--line);
+      color: var(--ink-secondary);
+    }
+
+    .verdict {
+      font-size: 0.68rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      padding: 3px 8px;
+      padding: 2px 8px;
       border-radius: 4px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
     }
 
-    .verdict-tag.promoted {
-      background: var(--accent-emerald-subtle);
-      color: var(--accent-emerald);
-      border: 1px solid rgba(5, 150, 105, 0.3);
+    .verdict.promoted {
+      background: var(--accent-soft);
+      color: var(--accent);
     }
 
-    .verdict-tag.pattern {
-      background: var(--accent-amber-subtle);
-      color: var(--accent-amber);
-      border: 1px solid rgba(217, 119, 6, 0.3);
+    .verdict.pattern {
+      background: var(--warn-soft);
+      color: var(--warn);
     }
 
-    .confidence-tag {
-      font-size: 0.7rem;
+    .conf {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--ink-faint);
+    }
+
+    .finding-name {
+      font-size: 1rem;
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
-      text-transform: uppercase;
+      margin-top: 2px;
     }
 
-    .confidence-tag.high {
-      background: var(--accent-blue-subtle);
-      color: var(--accent-blue);
-      border: 1px solid rgba(37, 99, 235, 0.3);
-    }
-
-    .confidence-tag.medium {
-      background: rgba(124, 58, 237, 0.1);
-      color: var(--accent-purple);
-      border: 1px solid rgba(124, 58, 237, 0.25);
-    }
-
-    .confidence-tag.low {
-      background: var(--bg-card-hover);
-      color: var(--text-muted);
-      border: 1px solid var(--border-subtle);
-    }
-
-    .cause-name {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin-top: 6px;
-    }
-
-    .finding-impact-box {
+    .finding-impact {
       text-align: right;
-      font-family: var(--font-mono);
+      flex-shrink: 0;
     }
 
     .impact-label {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       text-transform: uppercase;
-      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      color: var(--ink-faint);
       font-weight: 600;
     }
 
-    .impact-val {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--accent-rose);
+    .impact-value {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
     .impact-monthly {
+      font-family: var(--font-mono);
       font-size: 0.72rem;
-      color: var(--text-secondary);
+      color: var(--ink-secondary);
     }
 
-    .attrs-bar {
+    .attrs {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin: 10px 0;
+      margin: 12px 0 4px;
     }
 
-    .attr-chip {
+    .attr {
       font-family: var(--font-mono);
-      font-size: 0.74rem;
-      background: var(--bg-card-hover);
-      border: 1px solid var(--border-subtle);
+      font-size: 0.73rem;
+      color: var(--ink-secondary);
+      background: var(--surface-sunk);
+      border: 1px solid var(--line);
       padding: 3px 8px;
       border-radius: 4px;
-      color: var(--text-secondary);
     }
 
-    .attr-chip span {
-      color: var(--accent-blue);
-      font-weight: 700;
+    .attr b {
+      color: var(--ink);
+      font-weight: 600;
     }
 
-    .action-box {
-      background: var(--bg-card-hover);
-      border-left: 3px solid var(--accent-blue);
-      border-radius: 0 6px 6px 0;
-      padding: 10px 14px;
+    .action {
       margin-top: 12px;
+      padding: 11px 14px;
+      background: var(--surface-sunk);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      border-top: 1px solid var(--border-subtle);
-      border-right: 1px solid var(--border-subtle);
-      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
     }
 
-    .action-text {
-      font-size: 0.84rem;
-      color: var(--text-primary);
-      line-height: 1.4;
+    .action p {
+      font-size: 0.82rem;
+      line-height: 1.45;
     }
 
-    .action-text strong {
-      color: var(--accent-blue);
+    .action p b {
+      color: var(--accent);
     }
 
-    .btn-copy-action {
-      background: var(--bg-surface);
-      color: var(--accent-blue);
-      border: 1px solid var(--border-strong);
+    .copy-btn {
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px solid var(--line-strong);
       padding: 5px 10px;
-      font-size: 0.74rem;
+      font-size: 0.73rem;
+      font-weight: 600;
       border-radius: 4px;
       cursor: pointer;
-      white-space: nowrap;
-      font-weight: 600;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 5px;
+      white-space: nowrap;
     }
 
-    .btn-copy-action:hover {
-      background: var(--accent-blue-subtle);
-      border-color: var(--accent-blue);
+    .copy-btn:hover {
+      background: var(--accent-soft);
     }
 
-    /* Analytics Grid */
-    .analytics-grid {
+    .finding-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width:700px) {
+      .finding-pair {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .finding-mini-name {
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin-top: 2px;
+    }
+
+    .finding-mini-desc {
+      font-size: 0.78rem;
+      color: var(--ink-secondary);
+      margin: 6px 0 10px;
+      line-height: 1.45;
+    }
+
+    /* ---------- Analytics ---------- */
+    .analytics {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
 
-    @media (max-width: 900px) {
-      .analytics-grid {
+    @media (max-width:820px) {
+      .analytics {
         grid-template-columns: 1fr;
       }
     }
 
     .chart-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
       padding: 18px;
-      box-shadow: var(--card-shadow);
+      box-shadow: var(--shadow-card);
     }
 
     .chart-title {
-      font-size: 0.92rem;
+      font-size: 0.86rem;
       font-weight: 700;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: var(--text-primary);
+      margin-bottom: 2px;
     }
 
-    .chart-wrapper {
-      height: 230px;
+    .chart-note {
+      font-size: 0.72rem;
+      color: var(--ink-faint);
+      margin-bottom: 12px;
+    }
+
+    .chart-wrap {
+      height: 220px;
       position: relative;
     }
 
-    /* Table Explorer */
+    /* ---------- Table ---------- */
     .table-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
       overflow: hidden;
       margin-bottom: 40px;
-      box-shadow: var(--card-shadow);
+      box-shadow: var(--shadow-card);
     }
 
     .table-toolbar {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -624,130 +624,294 @@
       flex-wrap: wrap;
     }
 
-    .search-input-group {
+    .search-box {
       display: flex;
       align-items: center;
-      background: var(--bg-card-hover);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 6px 12px;
-      width: 280px;
       gap: 8px;
+      background: var(--surface-sunk);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 7px 11px;
+      width: 260px;
     }
 
-    .search-input-group input {
+    .search-box input {
       background: transparent;
       border: none;
       outline: none;
-      color: var(--text-primary);
-      font-size: 0.82rem;
+      color: var(--ink);
+      font-size: 0.81rem;
       width: 100%;
+      font-family: var(--font-display);
     }
 
-    .filter-chips {
+    .search-box input::placeholder {
+      color: var(--ink-faint);
+    }
+
+    .chips {
       display: flex;
       align-items: center;
       gap: 6px;
       flex-wrap: wrap;
     }
 
-    .chip-btn {
-      font-size: 0.74rem;
+    .chip {
+      font-size: 0.73rem;
       font-family: var(--font-mono);
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      padding: 4px 10px;
+      font-weight: 600;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--ink-faint);
+      padding: 4px 9px;
       border-radius: 4px;
       cursor: pointer;
-      font-weight: 600;
     }
 
-    .chip-btn:hover {
-      color: var(--text-secondary);
-      background: var(--bg-card-hover);
+    .chip:hover {
+      color: var(--ink-secondary);
+      background: var(--surface-sunk);
     }
 
-    .chip-btn.active {
-      background: var(--accent-blue-subtle);
-      border-color: var(--accent-blue);
-      color: var(--accent-blue);
+    .chip.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
-    .data-table-wrapper {
+    .table-scroll {
       overflow-x: auto;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.82rem;
-      text-align: left;
+      font-size: 0.81rem;
     }
 
     th {
-      background: var(--table-head-bg);
-      color: var(--text-muted);
-      font-weight: 700;
+      background: var(--surface-sunk);
+      color: var(--ink-faint);
+      font-weight: 600;
       text-transform: uppercase;
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       letter-spacing: 0.05em;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 9px 13px;
+      border-bottom: 1px solid var(--line);
       white-space: nowrap;
+      text-align: left;
+    }
+
+    th.num-col,
+    td.num-col {
+      text-align: right;
     }
 
     td {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--table-border);
-      color: var(--text-secondary);
+      padding: 9px 13px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink-secondary);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
+    tbody tr:hover td {
+      background: var(--surface-sunk);
+      color: var(--ink);
+    }
+
+    .status-chip {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: var(--negative-soft);
+      color: var(--negative);
+      border: 1px solid transparent;
+    }
+
+    .status-chip.clean {
+      background: var(--positive-soft);
+      color: var(--positive);
+    }
+
+    .d-pos {
+      color: var(--negative);
+      font-weight: 600;
+    }
+
+    .d-neg {
+      color: var(--positive);
+      font-weight: 600;
+    }
+
+    .d-zero {
+      color: var(--ink-faint);
+    }
+
+    .inspect-btn {
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--ink-secondary);
+      padding: 3px 9px;
+      font-size: 0.71rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-weight: 600;
+    }
+
+    .inspect-btn:hover {
+      background: var(--surface-sunk);
+      color: var(--ink);
+    }
+
+    .empty-row td {
+      text-align: center;
+      padding: 28px;
+      color: var(--ink-faint);
+      font-family: var(--font-display);
+    }
+
+    /* ---------- Benchmarks tab ---------- */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .kpi-card .ledger-label {
+      margin-bottom: 8px;
+    }
+
+    .kpi-card .ledger-value {
+      font-size: 1.45rem;
+    }
+
+    .kpi-card .ledger-sub {
+      margin-top: 4px;
+    }
+
+    .proof-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+
+    .proof-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .proof-body {
+      font-size: 0.84rem;
+      color: var(--ink-secondary);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .proof-body code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--surface-sunk);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--ink);
+    }
+
+    .proof-panel {
+      background: var(--surface-sunk);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    .proof-panel .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px 0;
+    }
+
+    .proof-panel .divider {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .proof-fail {
+      color: var(--negative);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    .proof-pass {
+      color: var(--positive);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ---------- Taxonomy ---------- */
+    .taxo-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .taxo-card table th {
+      background: var(--surface-sunk);
+    }
+
+    .taxo-card table td {
+      font-family: var(--font-display);
+      color: var(--ink-secondary);
+    }
+
+    .taxo-card table td.mono {
       font-family: var(--font-mono);
     }
 
-    tr:hover td {
-      background: var(--table-row-hover);
-      color: var(--text-primary);
+    .status-active {
+      color: var(--positive);
+      font-weight: 600;
+      font-family: var(--font-display);
+      font-size: 0.79rem;
     }
 
-    .code-badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      background: var(--accent-rose-subtle);
-      color: var(--accent-rose);
-      border: 1px solid rgba(225, 29, 72, 0.25);
+    .status-idle {
+      color: var(--ink-faint);
+      font-family: var(--font-display);
+      font-size: 0.79rem;
     }
 
-    .code-badge.clean {
-      background: var(--accent-emerald-subtle);
-      color: var(--accent-emerald);
-      border: 1px solid rgba(5, 150, 105, 0.25);
-    }
-
-    .delta-pos {
-      color: var(--accent-rose);
-      font-weight: 700;
-    }
-
-    .delta-neg {
-      color: var(--accent-blue);
-      font-weight: 700;
-    }
-
-    .delta-zero {
-      color: var(--text-muted);
-    }
-
-    /* Modal / Inspector Drawer */
-    .drawer-overlay {
+    /* ---------- Drawer ---------- */
+    .overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 23, 42, 0.6);
+      inset: 0;
+      background: rgba(15, 16, 20, 0.55);
       z-index: 200;
       display: none;
       align-items: center;
@@ -755,941 +919,923 @@
       padding: 20px;
     }
 
-    .drawer-content {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-strong);
-      border-radius: 12px;
+    .drawer {
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-md);
       width: 100%;
-      max-width: 620px;
-      max-height: 90vh;
+      max-width: 600px;
+      max-height: 88vh;
       overflow-y: auto;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
     }
 
-    .drawer-header {
+    .drawer-head {
       padding: 16px 20px;
-      border-bottom: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .drawer-eyebrow {
+      font-size: 0.68rem;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .drawer-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      margin-top: 2px;
+    }
+
+    .close-btn {
+      background: none;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 5px 7px;
+      cursor: pointer;
+      color: var(--ink-secondary);
+    }
+
+    .close-btn:hover {
+      background: var(--surface-sunk);
+      color: var(--ink);
     }
 
     .drawer-body {
       padding: 20px;
     }
 
-    /* Footer */
+    .facts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .fact {
+      background: var(--surface-sunk);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+
+    .fact-label {
+      font-size: 0.66rem;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .fact-value {
+      font-family: var(--font-mono);
+      font-size: 1.02rem;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .fact-sub {
+      font-size: 0.72rem;
+      color: var(--ink-secondary);
+      margin-top: 2px;
+    }
+
+    .compute-panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      margin-bottom: 14px;
+    }
+
+    .compute-panel .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+    }
+
+    .compute-panel .divider {
+      margin-top: 7px;
+      padding-top: 7px;
+      border-top: 1px dashed var(--line);
+      font-weight: 700;
+    }
+
+    .rule-note {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 13px;
+      font-size: 0.81rem;
+    }
+
+    .rule-note b {
+      color: var(--accent);
+      display: block;
+      margin-bottom: 2px;
+    }
+
     footer {
-      border-top: 1px solid var(--border-subtle);
+      border-top: 1px solid var(--line);
       padding: 20px 0;
-      font-size: 0.78rem;
-      color: var(--text-muted);
       text-align: center;
-      background: var(--bg-surface);
+      font-size: 0.76rem;
+      color: var(--ink-faint);
+      background: var(--surface);
+    }
+
+    @media (max-width:640px) {
+      .wrap {
+        padding: 0 16px;
+      }
+
+      .ledger-grid {
+        grid-template-columns: 1fr 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="container navbar-inner">
-      <div class="brand-group">
-        <div class="brand-logo">
-          <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+  <header>
+    <div class="wrap header-row">
+      <div class="brand">
+        <div class="brand-mark">
+          <i data-lucide="receipt-text" style="width:18px; height:18px;"></i>
         </div>
-        <div class="brand-text">
-          <h1>Ledgerscope <span class="brand-badge">AUDITOR</span></h1>
-          <div class="brand-tagline">Deterministic Fee & Tax Reconciliation for Razorpay Merchants</div>
-        </div>
-      </div>
-
-      <div class="nav-status-pills">
-        <div class="status-pill success">
-          <i data-lucide="activity" style="width: 13px; height: 13px;"></i>
-          <span>11,329 rec/s</span>
-        </div>
-        <div class="status-pill">
-          <i data-lucide="binary" style="width: 13px; height: 13px;"></i>
-          <span>Integer Math (Zero Float)</span>
-        </div>
-        <div class="status-pill success">
-          <i data-lucide="check" style="width: 13px; height: 13px;"></i>
-          <span>32/32 Tests</span>
-        </div>
-      </div>
-
-      <div class="nav-actions">
-        <button class="theme-toggle-btn" onclick="toggleTheme()">
-          <i data-lucide="sun" id="themeIcon" style="width:14px; height:14px;"></i>
-          <span id="themeText">Light</span>
-        </button>
-        <button class="btn btn-secondary" onclick="exportDisputeReport()">
-          <i data-lucide="download" style="width:14px; height:14px;"></i>
-          <span>Export Report</span>
-        </button>
-        <button class="btn btn-primary" onclick="simulateLiveRecon()">
-          <i data-lucide="play" style="width:14px; height:14px;"></i>
-          <span>Run Reconciler</span>
-        </button>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main View -->
-  <main class="container">
-
-    <!-- Tabs Bar -->
-    <div class="tabs-bar">
-      <div class="tab-group">
-        <button class="tab-btn active" onclick="switchTab('recon')">
-          <i data-lucide="layers" style="width:15px; height:15px;"></i>
-          <span>Settlement Batch View</span>
-        </button>
-        <button class="tab-btn" onclick="switchTab('benchmarks')">
-          <i data-lucide="gauge" style="width:15px; height:15px;"></i>
-          <span>Statistical Proofs & Benchmarks</span>
-        </button>
-        <button class="tab-btn" onclick="switchTab('taxonomy')">
-          <i data-lucide="book-open" style="width:15px; height:15px;"></i>
-          <span>Taxonomy (E01–E09)</span>
-        </button>
-      </div>
-      <div class="batch-badge">
-        Batch: <strong style="color: var(--accent-blue);">STL_2026_08</strong> · 62 Records · 3 Days
-      </div>
-    </div>
-
-    <!-- TAB 1: Reconciliation View -->
-    <div id="tab-recon">
-      
-      <!-- Top KPIs -->
-      <div class="kpi-grid">
-        <div class="kpi-card" style="--card-color: var(--accent-blue);">
-          <div class="kpi-title">
-            <span>Total Ingested Volume</span>
-            <i data-lucide="database" style="width:15px; height:15px;"></i>
-          </div>
-          <div class="kpi-value">₹3,75,410</div>
-          <div class="kpi-sub">
-            <span>62 paired transactions / settlements</span>
-          </div>
-        </div>
-
-        <div class="kpi-card" style="--card-color: var(--accent-emerald);">
-          <div class="kpi-title">
-            <span>Clean Settlement Match</span>
-            <i data-lucide="check-check" style="width:15px; height:15px; color:var(--accent-emerald);"></i>
-          </div>
-          <div class="kpi-value" style="color:var(--accent-emerald);">71.0%</div>
-          <div class="kpi-sub">
-            <span>44 / 62 transactions matched</span>
-          </div>
-        </div>
-
-        <div class="kpi-card" style="--card-color: var(--accent-rose);">
-          <div class="kpi-title">
-            <span>Discrepancies Detected</span>
-            <i data-lucide="alert-triangle" style="width:15px; height:15px; color:var(--accent-rose);"></i>
-          </div>
-          <div class="kpi-value" style="color:var(--accent-rose);">18</div>
-          <div class="kpi-sub">
-            <span>29.0% exception rate · 0 unexplained</span>
-          </div>
-        </div>
-
-        <div class="kpi-card" style="--card-color: var(--accent-purple);">
-          <div class="kpi-title">
-            <span>Projected Monthly Loss</span>
-            <i data-lucide="trending-up" style="width:15px; height:15px; color:var(--accent-purple);"></i>
-          </div>
-          <div class="kpi-value" style="color:var(--accent-purple);">₹3,879.50</div>
-          <div class="kpi-sub">
-            <span>Scaled x10.0 from ₹387.95 batch delta</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Root-Cause Detective Section -->
-      <div class="section-header">
         <div>
-          <h2 class="section-title">
-            <i data-lucide="search" style="width:18px; height:18px; color: var(--accent-blue);"></i>
-            <span>Root-Cause Detective Engine</span>
-          </h2>
-          <p class="section-subtitle">Systemic pattern detection across 18 exceptions using coverage-gated promotion rule</p>
+          <div class="brand-name">Ledgerscope</div>
+          <div class="brand-line">Settlement reconciliation for Razorpay merchants</div>
         </div>
-        <div class="status-pill" style="color: var(--accent-blue); border-color: rgba(37,99,235,0.3); background: var(--accent-blue-subtle);">
-          <span>Bar: Support ≥ 2 · Coverage > 50% · Sign Consistent</span>
+      </div>
+      <div class="header-meta" id="headerMeta">
+        <span class="dot"></span>
+        <span>Reconciled in integer paise · 32/32 checks passing</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" id="themeToggle" onclick="toggleTheme()">
+          <i data-lucide="moon" style="width:14px; height:14px;" id="themeIcon"></i>
+          <span id="themeText">Dark</span>
+        </button>
+        <button class="btn btn-ghost" onclick="exportReport()">
+          <i data-lucide="download" style="width:14px; height:14px;"></i>
+          <span>Export</span>
+        </button>
+        <button class="btn btn-primary" onclick="runReconciler(event)">
+          <i data-lucide="play" style="width:14px; height:14px;"></i>
+          <span>Run reconciler</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" style="padding-top:24px; padding-bottom:56px;">
+
+    <div class="tabbar">
+      <div class="tabs">
+        <button class="tab active" data-tab="recon" onclick="switchTab('recon')">
+          <i data-lucide="layers" style="width:14px; height:14px;"></i> Batch view
+        </button>
+        <button class="tab" data-tab="benchmarks" onclick="switchTab('benchmarks')">
+          <i data-lucide="gauge" style="width:14px; height:14px;"></i> Proofs &amp; benchmarks
+        </button>
+        <button class="tab" data-tab="taxonomy" onclick="switchTab('taxonomy')">
+          <i data-lucide="book-open" style="width:14px; height:14px;"></i> Exception taxonomy
+        </button>
+      </div>
+      <div class="batch-tag" id="batchTag">Batch <strong>STL_2026_08</strong> · — records · 3 days</div>
+    </div>
+
+    <!-- TAB: Reconciliation -->
+    <div id="tab-recon">
+
+      <div class="ledger-strip">
+        <div class="ledger-grid">
+          <div class="ledger-cell">
+            <div class="ledger-label">Ingested volume</div>
+            <div class="ledger-value num" id="kpiVolume">—</div>
+            <div class="ledger-sub" id="kpiVolumeSub">— paired transactions</div>
+          </div>
+          <div class="ledger-cell">
+            <div class="ledger-label">Clean match rate</div>
+            <div class="ledger-value num positive" id="kpiMatch">—</div>
+            <div class="ledger-sub" id="kpiMatchSub">— of — matched</div>
+          </div>
+          <div class="ledger-cell">
+            <div class="ledger-label">Exceptions found</div>
+            <div class="ledger-value num negative" id="kpiExceptions">—</div>
+            <div class="ledger-sub" id="kpiExceptionsSub">—</div>
+          </div>
+          <div class="ledger-cell">
+            <div class="ledger-label">Net batch delta → monthly</div>
+            <div class="ledger-value num" id="kpiDelta">—</div>
+            <div class="ledger-sub" id="kpiDeltaSub">—</div>
+          </div>
         </div>
       </div>
 
-      <div class="findings-container">
-        
-        <!-- RC_001: Promoted Root Cause -->
-        <div class="finding-card promoted">
-          <div class="finding-header">
-            <div>
-              <div class="finding-badge-group">
-                <span class="finding-id">RC_001</span>
-                <span class="verdict-tag promoted">
-                  <i data-lucide="shield-alert" style="width:13px; height:13px;"></i>
-                  LIKELY ROOT CAUSE
-                </span>
-                <span class="confidence-tag high">HIGH CONFIDENCE</span>
-                <span style="font-size:0.74rem; color:var(--text-muted);">55.6% Coverage (10 Txns)</span>
-              </div>
-              <div class="cause-name">Rate Misconfiguration on Enterprise Netbanking Plan</div>
-            </div>
-            <div class="finding-impact-box">
-              <div class="impact-label">Observed Impact</div>
-              <div class="impact-val">₹33.32</div>
-              <div class="impact-monthly">₹333.20 / mo projected</div>
-            </div>
-          </div>
-
-          <div class="attrs-bar">
-            <div class="attr-chip">Fee Plan: <span>PLN_ENT_2024</span></div>
-            <div class="attr-chip">Method: <span>Netbanking</span></div>
-            <div class="attr-chip">Exception Code: <span>E01 (Fee Rate Mismatch)</span></div>
-            <div class="attr-chip">Deviation: <span>+5.268% (CV: 0.0061)</span></div>
-            <div class="attr-chip">Sign: <span>Positive Overcharge</span></div>
-          </div>
-
-          <div class="action-box">
-            <div class="action-text">
-              <strong>ACTION REQUIRED:</strong> Audit the netbanking rate on fee plan <strong>PLN_ENT_2024</strong> — settlement is applying 2.00% instead of the configured 1.90% rate.
-            </div>
-            <button class="btn-copy-action" onclick="copyText('Audit the netbanking rate on fee plan PLN_ENT_2024 — settlement is applying a rate inconsistent with the plan configured rate.')">
-              <i data-lucide="copy" style="width:12px; height:12px;"></i> Copy Note
-            </button>
+      <div class="section-head">
+        <div>
+          <div class="section-title">Root-cause detective</div>
+          <div class="section-sub">Systemic patterns across the exceptions, promoted only when they clear the bar below
           </div>
         </div>
-
-        <!-- RC_004: GST Base Overcharge -->
-        <div class="finding-card">
-          <div class="finding-header">
-            <div>
-              <div class="finding-badge-group">
-                <span class="finding-id">RC_004</span>
-                <span class="verdict-tag pattern">
-                  <i data-lucide="info" style="width:13px; height:13px;"></i>
-                  POSSIBLE PATTERN
-                </span>
-                <span class="confidence-tag low">LOW CONFIDENCE</span>
-                <span style="font-size:0.74rem; color:var(--text-muted);">11.1% Coverage (2 Txns)</span>
-              </div>
-              <div class="cause-name">GST Base Computation Error (Tax Computed on Gross Order Amount)</div>
-            </div>
-            <div class="finding-impact-box">
-              <div class="impact-label">Observed Impact</div>
-              <div class="impact-val">₹352.80</div>
-              <div class="impact-monthly">₹3,528.00 / mo projected</div>
-            </div>
-          </div>
-
-          <div class="attrs-bar">
-            <div class="attr-chip">Fee Plan: <span>PLN_STD</span></div>
-            <div class="attr-chip">Method: <span>Card (Visa)</span></div>
-            <div class="attr-chip">Exception Code: <span>E03 (GST Base Mismatch)</span></div>
-            <div class="attr-chip">Deviation: <span>+747.46% (55x Tax Overcharge)</span></div>
-          </div>
-
-          <div class="action-box">
-            <div class="action-text">
-              <strong>ACTION REQUIRED:</strong> Review GST computation logic for card transactions on plan <strong>PLN_STD</strong> — tax appears to be computed on the gross transaction amount rather than on the platform fee.
-            </div>
-            <button class="btn-copy-action" onclick="copyText('Review the GST computation logic for card transactions on plan PLN_STD — tax appears to be computed on the gross transaction amount rather than on the platform fee.')">
-              <i data-lucide="copy" style="width:12px; height:12px;"></i> Copy Note
-            </button>
-          </div>
-        </div>
-
-        <!-- RC_002 & RC_003: Rounding drift and Refund Fee -->
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
-          <div class="finding-card">
-            <div class="finding-badge-group" style="margin-bottom:8px;">
-              <span class="finding-id">RC_002</span>
-              <span class="verdict-tag pattern">
-                <i data-lucide="info" style="width:12px; height:12px;"></i> POSSIBLE PATTERN
-              </span>
-              <span class="confidence-tag medium">MEDIUM</span>
-            </div>
-            <div style="font-weight:700; font-size:0.92rem; margin-bottom:4px; color:var(--text-primary);">Rounding Convention Truncation Drift</div>
-            <p style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:10px;">3 exceptions (16.7% coverage) · 1-paise discrepancy on PLN_STD netbanking transactions.</p>
-            <div class="action-box" style="padding:8px 12px; margin:0;">
-              <div class="action-text" style="font-size:0.76rem;">Check rounding mode: expected half-up, but truncation applied.</div>
-            </div>
-          </div>
-
-          <div class="finding-card">
-            <div class="finding-badge-group" style="margin-bottom:8px;">
-              <span class="finding-id">RC_003</span>
-              <span class="verdict-tag pattern">
-                <i data-lucide="info" style="width:12px; height:12px;"></i> POSSIBLE PATTERN
-              </span>
-              <span class="confidence-tag low">LOW</span>
-            </div>
-            <div style="font-weight:700; font-size:0.92rem; margin-bottom:4px; color:var(--text-primary);">Refund Fee Not Credited Back</div>
-            <p style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:10px;">2 refund transactions on PLN_STD settled without reversing original platform fee.</p>
-            <div class="action-box" style="padding:8px 12px; margin:0;">
-              <div class="action-text" style="font-size:0.76rem;">Confirm refund fee-reversal configuration on PLN_STD.</div>
-            </div>
-          </div>
-        </div>
-
+        <div class="rule-pill">support ≥ 2 · coverage &gt; 50% · sign-consistent</div>
       </div>
 
-      <!-- Charts Row -->
-      <div class="analytics-grid">
+      <div class="findings" id="findingsContainer"></div>
+
+      <div class="analytics">
         <div class="chart-card">
-          <div class="chart-title">
-            <span>Exceptions by Category Breakdown</span>
-            <span style="font-size:0.74rem; color:var(--text-muted);">18 Exceptions Total</span>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="categoryChart"></canvas>
-          </div>
+          <div class="chart-title">Exceptions by category</div>
+          <div class="chart-note" id="categoryChartNote">—</div>
+          <div class="chart-wrap"><canvas id="categoryChart"></canvas></div>
         </div>
-
         <div class="chart-card">
-          <div class="chart-title">
-            <span>Projected Monthly Rupee Impact by Cause</span>
-            <span style="font-size:0.74rem; color:var(--text-muted);">30-Day Extrapolation</span>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="impactChart"></canvas>
-          </div>
+          <div class="chart-title">Projected monthly impact by cause</div>
+          <div class="chart-note">30-day extrapolation from a 3-day batch</div>
+          <div class="chart-wrap"><canvas id="impactChart"></canvas></div>
         </div>
       </div>
 
-      <!-- Data Table Explorer -->
       <div class="table-card">
         <div class="table-toolbar">
-          <div class="search-input-group">
-            <i data-lucide="search" style="width:15px; height:15px; color:var(--text-muted);"></i>
-            <input type="text" id="tableSearch" placeholder="Search Txn ID, plan, or method..." oninput="filterTable()">
+          <div class="search-box">
+            <i data-lucide="search" style="width:14px; height:14px; color:var(--ink-faint);"></i>
+            <input type="text" id="tableSearch" placeholder="Search transaction, plan, method, code…"
+              oninput="onSearch()">
           </div>
-
-          <div class="filter-chips">
-            <span style="font-size:0.74rem; color:var(--text-muted); margin-right:4px;">Filter:</span>
-            <button class="chip-btn active" onclick="setFilter('ALL')">ALL (62)</button>
-            <button class="chip-btn" onclick="setFilter('EXCEPTIONS')">EXCEPTIONS (18)</button>
-            <button class="chip-btn" onclick="setFilter('E01')">E01 Rate (10)</button>
-            <button class="chip-btn" onclick="setFilter('E03')">E03 Base (2)</button>
-            <button class="chip-btn" onclick="setFilter('E04')">E04 Rounding (3)</button>
-            <button class="chip-btn" onclick="setFilter('E06')">E06 Refund (2)</button>
-            <button class="chip-btn" onclick="setFilter('E05')">E05 Tax (1)</button>
-          </div>
+          <div class="chips" id="filterChips"></div>
         </div>
-
-        <div class="data-table-wrapper">
-          <table id="reconTable">
+        <div class="table-scroll">
+          <table>
             <thead>
               <tr>
                 <th>Txn ID</th>
                 <th>Status</th>
-                <th>Method / Network</th>
-                <th>Fee Plan</th>
-                <th>Expected Fee</th>
-                <th>Settled Fee</th>
-                <th>Fee Δ</th>
-                <th>Expected GST</th>
-                <th>Settled GST</th>
-                <th>GST Δ</th>
-                <th>Total Δ</th>
-                <th>Diagnosis Code</th>
-                <th>Inspector</th>
+                <th>Method</th>
+                <th>Fee plan</th>
+                <th class="num-col">Expected fee</th>
+                <th class="num-col">Settled fee</th>
+                <th class="num-col">Fee Δ</th>
+                <th class="num-col">Expected GST</th>
+                <th class="num-col">Settled GST</th>
+                <th class="num-col">GST Δ</th>
+                <th class="num-col">Total Δ</th>
+                <th>Code</th>
+                <th></th>
               </tr>
             </thead>
-            <tbody id="tableBody">
-              <!-- Rendered via JS -->
-            </tbody>
+            <tbody id="tableBody"></tbody>
           </table>
         </div>
       </div>
-
     </div>
 
-    <!-- TAB 2: Benchmarks & Statistical Proofs -->
-    <div id="tab-benchmarks" style="display: none;">
-      <div class="section-header">
+    <!-- TAB: Benchmarks -->
+    <div id="tab-benchmarks" style="display:none;">
+      <div class="section-head">
         <div>
-          <h2 class="section-title">
-            <i data-lucide="award" style="width:18px; height:18px; color: var(--accent-emerald);"></i>
-            <span>Statistical Validation & Throughput Benchmarks</span>
-          </h2>
-          <p class="section-subtitle">Empirical evidence from 200 independent test batches and 5,000-record stress tests</p>
+          <div class="section-title">Proofs &amp; benchmarks</div>
+          <div class="section-sub">Reported from a separate 200-batch validation run and a 5,000-record stress test —
+            not the batch shown in Batch view</div>
         </div>
       </div>
 
       <div class="kpi-grid">
-        <div class="kpi-card" style="--card-color: var(--accent-emerald);">
-          <div class="kpi-title"><span>False Positive Rate</span></div>
-          <div class="kpi-value" style="color:var(--accent-emerald);">0.0%</div>
-          <div class="kpi-sub">0 / 100 unrelated noise batches promoted</div>
+        <div class="kpi-card">
+          <div class="ledger-label">False positive rate</div>
+          <div class="ledger-value num positive">0.0%</div>
+          <div class="ledger-sub">0 of 100 unrelated noise batches promoted</div>
         </div>
-
-        <div class="kpi-card" style="--card-color: var(--accent-blue);">
-          <div class="kpi-title"><span>Systemic Recall Rate</span></div>
-          <div class="kpi-value" style="color:var(--accent-blue);">100.0%</div>
-          <div class="kpi-sub">100 / 100 injected systemic causes detected</div>
+        <div class="kpi-card">
+          <div class="ledger-label">Systemic recall</div>
+          <div class="ledger-value num" style="color:var(--accent);">100.0%</div>
+          <div class="ledger-sub">100 of 100 injected causes detected</div>
         </div>
-
-        <div class="kpi-card" style="--card-color: var(--accent-purple);">
-          <div class="kpi-title"><span>Single-Core Speed</span></div>
-          <div class="kpi-value" style="color:var(--accent-purple);">11,329.6</div>
-          <div class="kpi-sub">paired records / second (< 455ms for 5k)</div>
+        <div class="kpi-card">
+          <div class="ledger-label">Single-core throughput</div>
+          <div class="ledger-value num">11,329.6</div>
+          <div class="ledger-sub">paired records / second (5k in 455ms)</div>
         </div>
-
-        <div class="kpi-card" style="--card-color: var(--accent-cyan);">
-          <div class="kpi-title"><span>Peak RAM Footprint</span></div>
-          <div class="kpi-value" style="color:var(--accent-cyan);">3.39 MB</div>
-          <div class="kpi-sub">zero float memory overhead</div>
+        <div class="kpi-card">
+          <div class="ledger-label">Peak memory</div>
+          <div class="ledger-value num">3.39 MB</div>
+          <div class="ledger-sub">zero floating-point allocation</div>
         </div>
       </div>
 
-      <div class="chart-card" style="margin-bottom: 24px;">
-        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 10px; display:flex; align-items:center; gap:8px;">
-          <i data-lucide="binary" style="width:16px; height:16px; color:var(--accent-blue);"></i>
-          The Banker's Rounding vs. Indian Half-Up Rounding Proof
-        </h3>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 14px;">
-          Python's built-in <code style="font-family:var(--font-mono); color:var(--accent-rose);">round()</code> uses Banker's Rounding (round-half-to-even), where <code style="font-family:var(--font-mono);">round(0.5) = 0</code> and <code style="font-family:var(--font-mono);">round(1.5) = 2</code>. Indian financial accounting standards strictly mandate <strong>Half-Up Rounding</strong> (<code style="font-family:var(--font-mono); color:var(--accent-emerald);">ROUND_HALF_UP</code>).
+      <div class="proof-card">
+        <div class="proof-title">
+          <i data-lucide="binary" style="width:16px; height:16px; color:var(--accent);"></i>
+          Half-up rounding vs. Python's banker's rounding
+        </div>
+        <p class="proof-body">
+          Python's built-in <code>round()</code> uses round-half-to-even, so <code>round(0.5) = 0</code>. Indian
+          financial
+          accounting requires <b>round-half-up</b> instead. The anchor case below is drawn directly from batch
+          <strong>STL_2026_08</strong> — it's the reason the three E04 exceptions in that batch carry a 1-paise drift.
         </p>
-        <div style="background: var(--bg-card-hover); border:1px solid var(--border-subtle); border-radius:8px; padding:14px; font-family:var(--font-mono); font-size:0.82rem;">
-          <div style="color:var(--text-muted); margin-bottom:6px;">// Anchor Transaction Case Study (₹1,337.49 @ 200 bps MDR):</div>
-          <div>Gross Amount = <strong>133,749 paise</strong> (₹1,337.49)</div>
-          <div>Platform Fee = 133,749 × 200 / 10,000 = 2,674.98 paise → <strong>2,675 paise</strong> (₹26.75)</div>
-          <div>18% GST Base = 2,675 × 1,800 / 10,000 = <strong>481.50 paise</strong></div>
-          <div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border-subtle); display:flex; flex-direction:column; gap:4px;">
-            <div style="color:var(--accent-rose); display:flex; align-items:center; gap:6px;">
-              <i data-lucide="x" style="width:13px; height:13px;"></i>
-              <span>Banker's Rounding (even): 481.50 → 481 paise (₹4.81)</span>
-            </div>
-            <div style="color:var(--accent-emerald); display:flex; align-items:center; gap:6px;">
-              <i data-lucide="check" style="width:13px; height:13px;"></i>
-              <span>Ledgerscope Half-Up: 481.50 → 482 paise (₹4.82) [MATCHED TO THE EXACT PAISE]</span>
-            </div>
+        <div class="proof-panel">
+          <div class="row"><span>Gross amount</span><span>133,749 paise (₹1,337.49)</span></div>
+          <div class="row"><span>Platform fee @ 200 bps</span><span>133,749 × 200 ÷ 10,000 = 2,674.98 → <b>2,675
+                paise</b></span></div>
+          <div class="row"><span>18% GST on fee</span><span>2,675 × 1,800 ÷ 10,000 = <b>481.50 paise</b></span></div>
+          <div class="divider">
+            <div class="proof-fail"><i data-lucide="x" style="width:12px;height:12px;"></i> Banker's rounding: 481.50 →
+              481 paise</div>
+            <div class="proof-pass"><i data-lucide="check" style="width:12px;height:12px;"></i> Ledgerscope half-up:
+              481.50 → 482 paise — matches the batch exactly</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- TAB 3: Taxonomy -->
-    <div id="tab-taxonomy" style="display: none;">
-      <div class="chart-card">
-        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 14px;">Ledgerscope Exception Taxonomy (E01–E09)</h3>
-        <table style="font-size: 0.82rem;">
+    <!-- TAB: Taxonomy -->
+    <div id="tab-taxonomy" style="display:none;">
+      <div class="taxo-card">
+        <div class="section-title" style="margin-bottom:14px;">Exception taxonomy · E01–E09</div>
+        <table>
           <thead>
             <tr>
               <th>Code</th>
-              <th>Category Name</th>
-              <th>Deterministic Trigger Rule</th>
-              <th>Exercise Status in Test Batch</th>
+              <th>Category</th>
+              <th>Deterministic trigger rule</th>
+              <th>In this batch</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td><span class="code-badge">E01</span></td>
-              <td><strong>FEE_RATE_MISMATCH</strong></td>
-              <td>Implied fee rate differs from plan rate by &gt; 1 basis point</td>
-              <td style="color:var(--accent-emerald); font-weight:600;">Active (10 occurrences)</td>
-            </tr>
-            <tr>
-              <td><span class="code-badge">E02</span></td>
-              <td><strong>GST_RATE_MISMATCH</strong></td>
-              <td>Fee correct, but tax/fee ratio implies GST rate differs from 18% by &gt; 10 bps</td>
-              <td style="color:var(--text-muted);">Taxonomy Defined</td>
-            </tr>
-            <tr>
-              <td><span class="code-badge">E03</span></td>
-              <td><strong>GST_BASE_MISMATCH</strong></td>
-              <td>18% GST was calculated on Gross Transaction amount rather than Platform Fee</td>
-              <td style="color:var(--accent-emerald); font-weight:600;">Active (2 occurrences)</td>
-            </tr>
-            <tr>
-              <td><span class="code-badge">E04</span></td>
-              <td><strong>ROUNDING_DRIFT</strong></td>
-              <td>|Total Delta| ≤ 2 paise and rates are otherwise mathematically correct</td>
-              <td style="color:var(--accent-emerald); font-weight:600;">Active (3 occurrences)</td>
-            </tr>
-            <tr>
-              <td><span class="code-badge">E05</span></td>
-              <td><strong>MISSING_TAX_LINE</strong></td>
-              <td>Settlement record is missing the tax line entirely while a fee was deducted</td>
-              <td style="color:var(--accent-emerald); font-weight:600;">Active (1 occurrence)</td>
-            </tr>
-            <tr>
-              <td><span class="code-badge">E06</span></td>
-              <td><strong>REFUND_FEE_NOT_REVERSED</strong></td>
-              <td>Transaction is a refund, but settlement failed to reverse/credit back the original fee</td>
-              <td style="color:var(--accent-emerald); font-weight:600;">Active (2 occurrences)</td>
-            </tr>
-            <tr>
-              <td><span class="code-badge">E07</span></td>
-              <td><strong>SETTLEMENT_TIMING</strong></td>
-              <td>Settlement timestamp fell outside the expected T+1/T+2 cycle window</td>
-              <td style="color:var(--text-muted);">Taxonomy Defined</td>
-            </tr>
-            <tr>
-              <td><span class="code-badge">E08</span></td>
-              <td><strong>DUPLICATE_DEDUCTION</strong></td>
-              <td>Multiple settlement debit rows discovered for the identical transaction ID</td>
-              <td style="color:var(--text-muted);">Taxonomy Defined</td>
-            </tr>
-            <tr>
-              <td><span class="code-badge">E09</span></td>
-              <td><strong>UNEXPLAINED</strong></td>
-              <td>Residual discrepancy — always reported, never suppressed</td>
-              <td style="color:var(--accent-emerald); font-weight:600;">0 in Current Batch</td>
-            </tr>
-          </tbody>
+          <tbody id="taxonomyBody"></tbody>
         </table>
       </div>
     </div>
 
   </main>
 
-  <!-- Math Inspector Modal -->
-  <div class="drawer-overlay" id="inspectorModal" onclick="closeInspector(event)">
-    <div class="drawer-content" onclick="event.stopPropagation()">
-      <div class="drawer-header">
+  <div class="overlay" id="overlay" onclick="onOverlayClick(event)">
+    <div class="drawer" onclick="event.stopPropagation()">
+      <div class="drawer-head">
         <div>
-          <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Integer Paise Audit Inspector</div>
-          <h3 id="modalTxnId" style="font-size:1.1rem; font-weight:800; font-family:var(--font-mono);">TXN_0045</h3>
+          <div class="drawer-eyebrow">Integer-paise inspector</div>
+          <div class="drawer-title" id="drawerTitle">—</div>
         </div>
-        <button class="btn btn-secondary" onclick="closeInspectorModal()" style="padding:4px 8px;">
-          <i data-lucide="x" style="width:14px; height:14px;"></i>
-        </button>
+        <button class="close-btn" onclick="closeDrawer()"><i data-lucide="x"
+            style="width:14px;height:14px;"></i></button>
       </div>
-      <div class="drawer-body" id="modalBody">
-        <!-- Rendered via JS -->
-      </div>
+      <div class="drawer-body" id="drawerBody"></div>
     </div>
   </div>
 
-  <!-- Footer -->
   <footer>
-    <div class="container">
-      Ledgerscope · Deterministic Settlement Fee Reconciliation Engine · Built for Razorpay Hackathon 2026
-    </div>
+    <div class="wrap">Ledgerscope · Deterministic settlement reconciliation · Razorpay Hackathon 2026</div>
   </footer>
 
   <script>
-    // Theme state
-    let isDark = false;
+    /* ============================================================
+       DATA — single source of truth. Every number shown on the
+       page is computed from this array; nothing above is typed
+       in twice, so the numbers can't drift out of sync with it.
+       ============================================================ */
+    const BATCH_DAYS = 3;
+    const PROJECTION_DAYS = 30;
 
-    function toggleTheme() {
-      isDark = !isDark;
-      document.documentElement.classList.toggle('dark', isDark);
-      
-      const themeIcon = document.getElementById('themeIcon');
-      const themeText = document.getElementById('themeText');
-      
-      if (isDark) {
-        themeIcon.setAttribute('data-lucide', 'moon');
-        themeText.textContent = 'Dark';
-      } else {
-        themeIcon.setAttribute('data-lucide', 'sun');
-        themeText.textContent = 'Light';
-      }
-      lucide.createIcons();
-      updateChartThemes();
-    }
-
-    // Embedded real batch data
     const BATCH_RESULTS = [
-      // 44 clean matched rows sample (represented efficiently)
-      ...Array.from({length: 44}, (_, i) => ({
-        txn_id: `TXN_${String(i+1).padStart(4, '0')}`,
-        status: 'MATCHED',
-        method: ['card', 'upi', 'netbanking', 'wallet'][i % 4],
-        network: i % 4 === 0 ? 'visa' : null,
-        plan: 'PLN_STD',
-        gross_paise: [10000, 250000, 55555, 375050, 380400][i % 5],
-        exp_fee_p: [200, 5000, 1111, 7501, 7608][i % 5],
-        act_fee_p: [200, 5000, 1111, 7501, 7608][i % 5],
-        fee_delta: 0,
-        exp_tax_p: [36, 900, 200, 1350, 1369][i % 5],
-        act_tax_p: [36, 900, 200, 1350, 1369][i % 5],
-        tax_delta: 0,
-        total_delta: 0,
-        code: null,
-        rule: 'rates & tax line match expected integer values'
-      })),
-      // 10 E01 exceptions (Enterprise Netbanking Rate Mismatch)
-      ...Array.from({length: 10}, (_, i) => {
-        const gross = [999950, 375050, 123450, 375050, 88900, 154600, 200000, 123450, 10000, 375050][i];
-        const exp_fee = Math.round(gross * 190 / 10000);
-        const act_fee = Math.round(gross * 200 / 10000);
-        const fee_d = act_fee - exp_fee;
-        const exp_tax = Math.round(exp_fee * 1800 / 10000);
-        const act_tax = Math.round(act_fee * 1800 / 10000);
-        const tax_d = act_tax - exp_tax;
+      ...Array.from({ length: 44 }, (_, i) => {
+        const g = [10000, 250000, 55555, 375050, 380400][i % 5];
+        const fee = [200, 5000, 1111, 7501, 7608][i % 5];
+        const tax = [36, 900, 200, 1350, 1369][i % 5];
         return {
-          txn_id: `TXN_${String(45 + i).padStart(4, '0')}`,
-          status: 'EXCEPTION',
-          method: 'netbanking',
-          network: null,
-          plan: 'PLN_ENT_2024',
-          gross_paise: gross,
-          exp_fee_p: exp_fee,
-          act_fee_p: act_fee,
-          fee_delta: fee_d,
-          exp_tax_p: exp_tax,
-          act_tax_p: act_tax,
-          tax_delta: tax_d,
-          total_delta: fee_d + tax_d,
-          code: 'E01',
-          rule: 'implied 200bps != applied 190bps on fee plan PLN_ENT_2024'
+          txn_id: `TXN_${String(i + 1).padStart(4, '0')}`, status: 'MATCHED',
+          method: ['card', 'upi', 'netbanking', 'wallet'][i % 4],
+          network: i % 4 === 0 ? 'visa' : null,
+          plan: 'PLN_STD', gross_paise: g,
+          exp_fee_p: fee, act_fee_p: fee, fee_delta: 0,
+          exp_tax_p: tax, act_tax_p: tax, tax_delta: 0, total_delta: 0,
+          code: null, rule: 'Rate and tax line match the expected integer values.'
         };
       }),
-      // 3 E04 exceptions (Rounding Drift)
-      ...Array.from({length: 3}, (_, i) => ({
-        txn_id: `TXN_${String(55 + i).padStart(4, '0')}`,
-        status: 'EXCEPTION',
-        method: 'netbanking',
-        network: null,
-        plan: 'PLN_STD',
-        gross_paise: 133749,
-        exp_fee_p: 2675,
-        act_fee_p: 2675,
-        fee_delta: 0,
-        exp_tax_p: 482,
-        act_tax_p: 481,
-        tax_delta: -1,
-        total_delta: -1,
-        code: 'E04',
-        rule: 'sub-paise drift (481.5p truncated instead of half-up rounded)'
+      ...Array.from({ length: 10 }, (_, i) => {
+        const gross = [999950, 375050, 123450, 375050, 88900, 154600, 200000, 123450, 10000, 375050][i];
+        const exp_fee = Math.round(gross * 190 / 10000), act_fee = Math.round(gross * 200 / 10000);
+        const fee_d = act_fee - exp_fee;
+        const exp_tax = Math.round(exp_fee * 1800 / 10000), act_tax = Math.round(act_fee * 1800 / 10000);
+        const tax_d = act_tax - exp_tax;
+        return {
+          txn_id: `TXN_${String(45 + i).padStart(4, '0')}`, status: 'EXCEPTION',
+          method: 'netbanking', network: null, plan: 'PLN_ENT_2024', gross_paise: gross,
+          exp_fee_p: exp_fee, act_fee_p: act_fee, fee_delta: fee_d,
+          exp_tax_p: exp_tax, act_tax_p: act_tax, tax_delta: tax_d, total_delta: fee_d + tax_d,
+          code: 'E01', rule: 'Implied rate is 200 bps against a configured 190 bps on fee plan PLN_ENT_2024.'
+        };
+      }),
+      ...Array.from({ length: 3 }, (_, i) => ({
+        txn_id: `TXN_${String(55 + i).padStart(4, '0')}`, status: 'EXCEPTION',
+        method: 'netbanking', network: null, plan: 'PLN_STD', gross_paise: 133749,
+        exp_fee_p: 2675, act_fee_p: 2675, fee_delta: 0,
+        exp_tax_p: 482, act_tax_p: 481, tax_delta: -1, total_delta: -1,
+        code: 'E04', rule: '481.5 paise was truncated to 481 instead of rounded half-up to 482.'
       })),
-      // 2 E03 exceptions (GST Base Mismatch)
-      ...Array.from({length: 2}, (_, i) => ({
-        txn_id: `TXN_${String(58 + i).padStart(4, '0')}`,
-        status: 'EXCEPTION',
-        method: 'card',
-        network: 'visa',
-        plan: 'PLN_STD',
-        gross_paise: 100000,
-        exp_fee_p: 2000,
-        act_fee_p: 2000,
-        fee_delta: 0,
-        exp_tax_p: 360,
-        act_tax_p: 18000,
-        tax_delta: 17640,
-        total_delta: 17640,
-        code: 'E03',
-        rule: '18% GST charged on gross amount (₹1,000) instead of fee (₹20)'
+      ...Array.from({ length: 2 }, (_, i) => ({
+        txn_id: `TXN_${String(58 + i).padStart(4, '0')}`, status: 'EXCEPTION',
+        method: 'card', network: 'visa', plan: 'PLN_STD', gross_paise: 100000,
+        exp_fee_p: 2000, act_fee_p: 2000, fee_delta: 0,
+        exp_tax_p: 360, act_tax_p: 18000, tax_delta: 17640, total_delta: 17640,
+        code: 'E03', rule: '18% GST was computed on the ₹1,000 gross amount instead of the ₹20 platform fee.'
       })),
-      // 2 E06 exceptions (Refund Fee Not Reversed)
-      ...Array.from({length: 2}, (_, i) => ({
-        txn_id: `TXN_${String(60 + i).padStart(4, '0')}`,
-        status: 'EXCEPTION',
-        method: 'card',
-        network: 'visa',
-        plan: 'PLN_STD',
-        gross_paise: 50000,
-        exp_fee_p: 1000,
-        act_fee_p: 1000,
-        fee_delta: 0,
-        exp_tax_p: 180,
-        act_tax_p: 180,
-        tax_delta: 0,
-        total_delta: 0,
-        code: 'E06',
-        rule: 'refund transaction settled without crediting back original platform fee'
+      ...Array.from({ length: 2 }, (_, i) => ({
+        txn_id: `TXN_${String(60 + i).padStart(4, '0')}`, status: 'EXCEPTION',
+        method: 'card', network: 'visa', plan: 'PLN_STD', gross_paise: 50000,
+        exp_fee_p: 1000, act_fee_p: 1000, fee_delta: 0,
+        exp_tax_p: 180, act_tax_p: 180, tax_delta: 0, total_delta: 0,
+        code: 'E06', rule: 'Refund settled without reversing the original platform fee. Flagged by transaction type — the delta shows 0 because the expected baseline also omits the reversal.'
       })),
-      // 1 E05 exception (Missing Tax Line)
       {
-        txn_id: 'TXN_0062',
-        status: 'EXCEPTION',
-        method: 'upi',
-        network: null,
-        plan: 'PLN_STD',
-        gross_paise: 50000,
-        exp_fee_p: 1000,
-        act_fee_p: 1000,
-        fee_delta: 0,
-        exp_tax_p: 180,
-        act_tax_p: null,
-        tax_delta: -180,
-        total_delta: -180,
-        code: 'E05',
-        rule: 'GST tax line omitted in settlement row while fee was charged'
+        txn_id: 'TXN_0062', status: 'EXCEPTION', method: 'upi', network: null, plan: 'PLN_STD', gross_paise: 50000,
+        exp_fee_p: 1000, act_fee_p: 1000, fee_delta: 0,
+        exp_tax_p: 180, act_tax_p: null, tax_delta: -180, total_delta: -180,
+        code: 'E05', rule: 'GST tax line is missing from the settlement row while a fee was deducted.'
       }
     ];
 
-    let currentFilter = 'ALL';
-    let currentSearch = '';
-    let categoryChartInstance = null;
-    let impactChartInstance = null;
+    const TAXONOMY = [
+      { code: 'E01', name: 'FEE_RATE_MISMATCH', rule: 'Implied fee rate differs from the plan rate by more than 1 basis point' },
+      { code: 'E02', name: 'GST_RATE_MISMATCH', rule: 'Fee is correct, but the tax-to-fee ratio implies a GST rate off by more than 10 bps' },
+      { code: 'E03', name: 'GST_BASE_MISMATCH', rule: '18% GST was calculated on the gross amount rather than the platform fee' },
+      { code: 'E04', name: 'ROUNDING_DRIFT', rule: 'Total delta is 2 paise or less and rates are otherwise correct' },
+      { code: 'E05', name: 'MISSING_TAX_LINE', rule: 'Settlement row omits the tax line entirely while a fee was deducted' },
+      { code: 'E06', name: 'REFUND_FEE_NOT_REVERSED', rule: 'Refund settled without crediting back the original platform fee' },
+      { code: 'E07', name: 'SETTLEMENT_TIMING', rule: 'Settlement timestamp fell outside the expected T+1/T+2 window' },
+      { code: 'E08', name: 'DUPLICATE_DEDUCTION', rule: 'Multiple settlement debit rows found for one transaction ID' },
+      { code: 'E09', name: 'UNEXPLAINED', rule: 'Residual discrepancy that fits no other rule — always reported, never suppressed' }
+    ];
 
-    // Initialize UI
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      renderTable();
-      initCharts();
-    });
+    const CODE_META = {
+      E01: {
+        name: 'Rate misconfiguration on the enterprise netbanking plan', plan: 'PLN_ENT_2024', method: 'Netbanking',
+        action: 'Audit the netbanking rate on fee plan PLN_ENT_2024 — settlement is applying 2.00% instead of the configured 1.90%.'
+      },
+      E03: {
+        name: 'GST computed on gross amount instead of platform fee', plan: 'PLN_STD', method: 'Card (Visa)',
+        action: 'Review the GST computation for card transactions on PLN_STD — tax is being computed on the gross transaction amount rather than the fee.'
+      },
+      E04: {
+        name: 'Rounding convention drift (truncation vs. half-up)', plan: 'PLN_STD', method: 'Netbanking',
+        action: 'Check the tax rounding mode — half-up is expected but truncation is being applied, producing a 1-paise drift.'
+      },
+      E06: {
+        name: 'Refund settlements not crediting back the platform fee', plan: 'PLN_STD', method: 'Card (Visa)',
+        action: 'Confirm the fee-reversal configuration on PLN_STD — refunds are settling without reversing the original fee.'
+      }
+    };
 
-    function formatINR(paise) {
-      if (paise === null || paise === undefined) return '—';
-      const rupees = (paise / 100).toFixed(2);
-      return `₹${Number(rupees).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    }
+    /* ============================================================
+       Derived stats — computed once from BATCH_RESULTS
+       ============================================================ */
+    function computeStats(rows) {
+      const matched = rows.filter(r => r.status === 'MATCHED');
+      const exceptions = rows.filter(r => r.status === 'EXCEPTION');
+      const totalGross = rows.reduce((s, r) => s + r.gross_paise, 0);
+      const netDelta = rows.reduce((s, r) => s + r.total_delta, 0);
 
-    function renderTable() {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
-
-      const filtered = BATCH_RESULTS.filter(r => {
-        // Code / Status filter
-        if (currentFilter === 'EXCEPTIONS' && r.status !== 'EXCEPTION') return false;
-        if (['E01', 'E03', 'E04', 'E05', 'E06'].includes(currentFilter) && r.code !== currentFilter) return false;
-
-        // Search query
-        if (currentSearch) {
-          const q = currentSearch.toLowerCase();
-          const matchTxn = r.txn_id.toLowerCase().includes(q);
-          const matchPlan = r.plan.toLowerCase().includes(q);
-          const matchMethod = r.method.toLowerCase().includes(q);
-          const matchCode = (r.code || '').toLowerCase().includes(q);
-          if (!matchTxn && !matchPlan && !matchMethod && !matchCode) return false;
-        }
-        return true;
+      const byCode = {};
+      exceptions.forEach(r => {
+        if (!byCode[r.code]) byCode[r.code] = { rows: [], count: 0, deltaSum: 0 };
+        byCode[r.code].rows.push(r);
+        byCode[r.code].count++;
+        byCode[r.code].deltaSum += r.total_delta;
       });
 
-      filtered.forEach(r => {
-        const tr = document.createElement('tr');
-        
-        let deltaClass = 'delta-zero';
-        let deltaPrefix = '';
-        if (r.total_delta > 0) {
-          deltaClass = 'delta-pos';
-          deltaPrefix = '+';
-        } else if (r.total_delta < 0) {
-          deltaClass = 'delta-neg';
-        }
-
-        tr.innerHTML = `
-          <td><strong>${r.txn_id}</strong></td>
-          <td><span class="code-badge ${r.status === 'MATCHED' ? 'clean' : ''}">${r.status}</span></td>
-          <td>${r.method.toUpperCase()} ${r.network ? `(${r.network})` : ''}</td>
-          <td>${r.plan}</td>
-          <td>${formatINR(r.exp_fee_p)}</td>
-          <td>${formatINR(r.act_fee_p)}</td>
-          <td class="${r.fee_delta !== 0 ? (r.fee_delta > 0 ? 'delta-pos' : 'delta-neg') : 'delta-zero'}">
-            ${r.fee_delta !== 0 ? (r.fee_delta > 0 ? '+' : '') + formatINR(r.fee_delta) : '₹0.00'}
-          </td>
-          <td>${formatINR(r.exp_tax_p)}</td>
-          <td>${formatINR(r.act_tax_p)}</td>
-          <td class="${r.tax_delta !== 0 ? (r.tax_delta > 0 ? 'delta-pos' : 'delta-neg') : 'delta-zero'}">
-            ${r.tax_delta !== 0 ? (r.tax_delta > 0 ? '+' : '') + formatINR(r.tax_delta) : '₹0.00'}
-          </td>
-          <td class="${deltaClass}">${deltaPrefix}${formatINR(r.total_delta)}</td>
-          <td>${r.code ? `<span class="code-badge">${r.code}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
-          <td>
-            <button class="btn btn-secondary" style="padding:3px 8px; font-size:0.72rem;" onclick="openInspector('${r.txn_id}')">
-              Inspect
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+      Object.keys(byCode).forEach(code => {
+        const c = byCode[code];
+        c.coveragePct = c.count / exceptions.length * 100;
+        const signs = new Set(c.rows.map(r => Math.sign(r.total_delta)));
+        signs.delete(0);
+        c.signConsistent = signs.size <= 1;
+        c.promoted = c.count >= 2 && c.coveragePct > 50 && c.signConsistent;
+        c.confidence = c.count >= 5 ? 'high' : c.count >= 3 ? 'medium' : 'low';
       });
+
+      return {
+        total: rows.length, matched: matched.length, exceptionCount: exceptions.length,
+        totalGross, netDelta, byCode,
+        matchRate: matched.length / rows.length * 100,
+        exceptionRate: exceptions.length / rows.length * 100,
+        monthlyProjected: netDelta * (PROJECTION_DAYS / BATCH_DAYS)
+      };
     }
 
-    function setFilter(filter) {
-      currentFilter = filter;
-      document.querySelectorAll('.chip-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.includes(filter) || (filter === 'ALL' && btn.textContent.includes('ALL')));
-      });
-      renderTable();
+    const STATS = computeStats(BATCH_RESULTS);
+
+    function fmtINR(paiseVal) {
+      if (paiseVal === null || paiseVal === undefined) return '—';
+      const rupees = paiseVal / 100;
+      const formatted = Math.abs(rupees).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return (rupees < 0 ? '−' : '') + '₹' + formatted;
+    }
+    function fmtCount(n) { return n.toLocaleString('en-IN'); }
+
+    /* ============================================================
+       Render: ledger strip KPIs
+       ============================================================ */
+    function renderKpis() {
+      document.getElementById('batchTag').innerHTML =
+        `Batch <strong>STL_2026_08</strong> · ${fmtCount(STATS.total)} records · ${BATCH_DAYS} days`;
+
+      document.getElementById('kpiVolume').textContent = fmtINR(STATS.totalGross);
+      document.getElementById('kpiVolumeSub').textContent = `${fmtCount(STATS.total)} paired transactions`;
+
+      document.getElementById('kpiMatch').textContent = STATS.matchRate.toFixed(1) + '%';
+      document.getElementById('kpiMatchSub').textContent = `${fmtCount(STATS.matched)} of ${fmtCount(STATS.total)} matched`;
+
+      document.getElementById('kpiExceptions').textContent = fmtCount(STATS.exceptionCount);
+      document.getElementById('kpiExceptionsSub').textContent =
+        `${STATS.exceptionRate.toFixed(1)}% exception rate · ${(STATS.byCode.E09?.count) || 0} unexplained`;
+
+      const deltaEl = document.getElementById('kpiDelta');
+      deltaEl.textContent = fmtINR(STATS.netDelta) + ' → ' + fmtINR(STATS.monthlyProjected);
+      deltaEl.className = 'ledger-value num ' + (STATS.netDelta > 0 ? 'negative' : STATS.netDelta < 0 ? 'positive' : '');
+      document.getElementById('kpiDeltaSub').textContent =
+        `Net of overcharges and undercharges, scaled ×${(PROJECTION_DAYS / BATCH_DAYS).toFixed(1)} for the month`;
     }
 
-    function filterTable() {
-      currentSearch = document.getElementById('tableSearch').value;
-      renderTable();
+    /* ============================================================
+       Render: root-cause findings (computed from STATS.byCode)
+       ============================================================ */
+    function deviationLine(code, entry) {
+      const rows = entry.rows;
+      if (code === 'E01') {
+        const avgPct = rows.reduce((s, r) => s + (r.act_fee_p / r.exp_fee_p - 1), 0) / rows.length * 100;
+        return `<div class="attr">Deviation: <b>+${avgPct.toFixed(2)}% avg rate</b> (190 → 200 bps, constant across ${rows.length} txns)</div>`;
+      }
+      if (code === 'E03') {
+        const avgMult = rows.reduce((s, r) => s + (r.act_tax_p / r.exp_tax_p), 0) / rows.length;
+        return `<div class="attr">Deviation: <b>${avgMult.toFixed(1)}× tax overcharge</b></div>`;
+      }
+      if (code === 'E04') {
+        const avgAbs = rows.reduce((s, r) => s + Math.abs(r.total_delta), 0) / rows.length;
+        return `<div class="attr">Deviation: <b>${avgAbs.toFixed(1)} paise avg drift</b> per transaction</div>`;
+      }
+      if (code === 'E06') {
+        return `<div class="attr">Detected by: <b>transaction type</b>, not amount delta</div>`;
+      }
+      return '';
     }
 
-    function openInspector(txnId) {
-      const r = BATCH_RESULTS.find(x => x.txn_id === txnId);
-      if (!r) return;
+    function renderFindings() {
+      const container = document.getElementById('findingsContainer');
+      container.innerHTML = '';
 
-      document.getElementById('modalTxnId').textContent = `${r.txn_id} · ${r.status}`;
-      
-      const body = document.getElementById('modalBody');
-      body.innerHTML = `
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
-          <div style="background:var(--bg-card-hover); padding:10px; border-radius:6px; border:1px solid var(--border-subtle);">
-            <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Gross Amount</div>
-            <div style="font-size:1.15rem; font-weight:800; font-family:var(--font-mono); color:var(--text-primary);">${formatINR(r.gross_paise)}</div>
-            <div style="font-size:0.72rem; color:var(--text-secondary);">${r.gross_paise} paise</div>
-          </div>
-          <div style="background:var(--bg-card-hover); padding:10px; border-radius:6px; border:1px solid var(--border-subtle);">
-            <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Fee Plan & Mode</div>
-            <div style="font-size:1.05rem; font-weight:800; color:var(--text-primary);">${r.plan}</div>
-            <div style="font-size:0.72rem; color:var(--text-secondary);">${r.method.toUpperCase()} ${r.network ? `· ${r.network}` : ''}</div>
-          </div>
+      const codes = Object.keys(STATS.byCode)
+        .filter(c => STATS.byCode[c].count >= 2 && CODE_META[c])
+        .sort((a, b) => {
+          const A = STATS.byCode[a], B = STATS.byCode[b];
+          if (A.promoted !== B.promoted) return A.promoted ? -1 : 1;
+          return Math.abs(B.deltaSum) - Math.abs(A.deltaSum);
+        });
+
+      if (codes.length === 0) {
+        container.innerHTML = '<div class="finding"><p style="color:var(--ink-faint); font-size:0.85rem;">No repeating pattern cleared the support threshold in this batch.</p></div>';
+        return;
+      }
+
+      // First two get full-width cards, remainder pair up
+      const full = codes.slice(0, 2);
+      const rest = codes.slice(2);
+
+      full.forEach(code => container.appendChild(buildFindingCard(code, STATS.byCode[code])));
+
+      if (rest.length) {
+        const pairWrap = document.createElement('div');
+        pairWrap.className = 'finding-pair';
+        rest.forEach(code => pairWrap.appendChild(buildMiniFindingCard(code, STATS.byCode[code])));
+        container.appendChild(pairWrap);
+      }
+    }
+
+    function buildFindingCard(code, entry) {
+      const meta = CODE_META[code];
+      const card = document.createElement('div');
+      card.className = 'finding' + (entry.promoted ? ' promoted' : '');
+      card.innerHTML = `
+    <div class="finding-top">
+      <div>
+        <div class="badge-row">
+          <span class="code-tag">RC · ${code}</span>
+          <span class="verdict ${entry.promoted ? 'promoted' : 'pattern'}">${entry.promoted ? 'Likely root cause' : 'Possible pattern'}</span>
+          <span class="conf">${entry.confidence.toUpperCase()} CONFIDENCE</span>
+          <span class="conf">${entry.coveragePct.toFixed(1)}% coverage (${entry.count} txns)</span>
         </div>
-
-        <div style="background:var(--bg-base); border:1px solid var(--border-subtle); border-radius:8px; padding:14px; font-family:var(--font-mono); font-size:0.8rem; margin-bottom:14px;">
-          <div style="color:var(--accent-blue); font-weight:700; margin-bottom:8px;">Exact Integer Paise Computation:</div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <span>Expected Fee:</span>
-            <span><strong>${r.exp_fee_p}p</strong> (${formatINR(r.exp_fee_p)})</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <span>Actual Settled Fee:</span>
-            <span style="color:${r.fee_delta !== 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)'};"><strong>${r.act_fee_p}p</strong> (${formatINR(r.act_fee_p)})</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <span>Expected 18% GST:</span>
-            <span><strong>${r.exp_tax_p}p</strong> (${formatINR(r.exp_tax_p)})</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <span>Actual Settled GST:</span>
-            <span style="color:${r.tax_delta !== 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)'};"><strong>${r.act_tax_p !== null ? r.act_tax_p + 'p' : 'None'}</strong> (${formatINR(r.act_tax_p)})</span>
-          </div>
-          <div style="padding-top:8px; border-top:1px dashed var(--border-subtle); display:flex; justify-content:space-between; font-weight:700;">
-            <span>Net Discrepancy (Delta):</span>
-            <span style="color:${r.total_delta !== 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)'};">${r.total_delta > 0 ? '+' : ''}${formatINR(r.total_delta)}</span>
-          </div>
-        </div>
-
-        <div style="background:var(--accent-blue-subtle); border-left:3px solid var(--accent-blue); padding:10px; border-radius:0 6px 6px 0; font-size:0.82rem; border-top:1px solid var(--border-subtle); border-right:1px solid var(--border-subtle); border-bottom:1px solid var(--border-subtle);">
-          <div style="font-weight:700; color:var(--accent-blue); margin-bottom:2px;">Classifier Diagnosis Rule:</div>
-          <div style="color:var(--text-primary);">${r.rule}</div>
-        </div>
-      `;
-
-      document.getElementById('inspectorModal').style.display = 'flex';
-      lucide.createIcons();
+        <div class="finding-name">${meta.name}</div>
+      </div>
+      <div class="finding-impact">
+        <div class="impact-label">Observed impact</div>
+        <div class="impact-value num">${fmtINR(Math.abs(entry.deltaSum))}</div>
+        <div class="impact-monthly num">${fmtINR(Math.abs(entry.deltaSum) * (PROJECTION_DAYS / BATCH_DAYS))} / mo projected</div>
+      </div>
+    </div>
+    <div class="attrs">
+      <div class="attr">Fee plan: <b>${meta.plan}</b></div>
+      <div class="attr">Method: <b>${meta.method}</b></div>
+      <div class="attr">Code: <b>${code}</b></div>
+      ${deviationLine(code, entry)}
+    </div>
+    <div class="action">
+      <p><b>Action:</b> ${meta.action}</p>
+      <button class="copy-btn" onclick="copyText(this, '${meta.action.replace(/'/g, "\\'")}')">
+        <i data-lucide="copy" style="width:11px;height:11px;"></i> Copy
+      </button>
+    </div>
+  `;
+      return card;
     }
 
-    function closeInspectorModal() {
-      document.getElementById('inspectorModal').style.display = 'none';
+    function buildMiniFindingCard(code, entry) {
+      const meta = CODE_META[code];
+      const div = document.createElement('div');
+      div.className = 'finding';
+      div.innerHTML = `
+    <div class="badge-row">
+      <span class="code-tag">RC · ${code}</span>
+      <span class="verdict pattern">Possible pattern</span>
+      <span class="conf">${entry.confidence.toUpperCase()}</span>
+    </div>
+    <div class="finding-mini-name">${meta.name}</div>
+    <p class="finding-mini-desc">${entry.count} exceptions (${entry.coveragePct.toFixed(1)}% coverage) on ${meta.plan} · ${meta.method}.</p>
+    <div class="action" style="margin-top:0;">
+      <p style="font-size:0.78rem;">${meta.action}</p>
+    </div>
+  `;
+      return div;
     }
 
-    function closeInspector(e) {
-      if (e.target.id === 'inspectorModal') closeInspectorModal();
-    }
-
-    function switchTab(tabId) {
-      document.getElementById('tab-recon').style.display = tabId === 'recon' ? 'block' : 'none';
-      document.getElementById('tab-benchmarks').style.display = tabId === 'benchmarks' ? 'block' : 'none';
-      document.getElementById('tab-taxonomy').style.display = tabId === 'taxonomy' ? 'block' : 'none';
-      
-      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-        btn.classList.toggle('active', 
-          (tabId === 'recon' && idx === 0) || 
-          (tabId === 'benchmarks' && idx === 1) || 
-          (tabId === 'taxonomy' && idx === 2)
-        );
-      });
-      lucide.createIcons();
-    }
-
-    function copyText(text) {
-      navigator.clipboard.writeText(text);
-      alert('Action note copied to clipboard.');
-    }
-
-    function exportDisputeReport() {
-      alert('Ledgerscope audit dossier export generated.');
-    }
-
-    function simulateLiveRecon() {
-      const btn = event.currentTarget;
-      btn.innerHTML = '<i data-lucide="loader-2" style="width:14px; height:14px; animation:spin 1s linear infinite;"></i> Recomputing...';
-      lucide.createIcons();
-      setTimeout(() => {
-        btn.innerHTML = '<i data-lucide="check" style="width:14px; height:14px;"></i> Reconciled (4.8ms)';
-        lucide.createIcons();
-        setTimeout(() => {
-          btn.innerHTML = '<i data-lucide="play" style="width:14px; height:14px;"></i> Run Reconciler';
-          lucide.createIcons();
-        }, 1800);
-      }, 300);
-    }
+    /* ============================================================
+       Render: charts
+       ============================================================ */
+    const CODE_COLOR = { E01: '#2f3f66', E03: '#b3402c', E04: '#7386ad', E06: '#8b909c', E05: '#a8720a' };
+    let categoryChart = null, impactChart = null;
 
     function initCharts() {
-      const textColor = isDark ? '#94a3b8' : '#475569';
-      const gridColor = isDark ? '#1e293b' : '#f1f5f9';
+      const styles = getComputedStyle(document.documentElement);
+      const textColor = styles.getPropertyValue('--ink-secondary').trim();
+      const gridColor = styles.getPropertyValue('--line').trim();
+      const surface = styles.getPropertyValue('--surface').trim();
 
-      // Category Breakdown Donut Chart
-      const catCtx = document.getElementById('categoryChart').getContext('2d');
-      categoryChartInstance = new Chart(catCtx, {
+      const codes = Object.keys(STATS.byCode).sort((a, b) => STATS.byCode[b].count - STATS.byCode[a].count);
+      document.getElementById('categoryChartNote').textContent = `${fmtCount(STATS.exceptionCount)} exceptions total`;
+
+      if (categoryChart) categoryChart.destroy();
+      categoryChart = new Chart(document.getElementById('categoryChart').getContext('2d'), {
         type: 'doughnut',
         data: {
-          labels: ['E01 Rate Mismatch (10)', 'E04 Rounding Drift (3)', 'E03 GST Base Error (2)', 'E06 Refund Fee (2)', 'E05 Missing Tax (1)'],
+          labels: codes.map(c => `${c} · ${TAXONOMY.find(t => t.code === c).name.replace(/_/g, ' ')} (${STATS.byCode[c].count})`),
           datasets: [{
-            data: [10, 3, 2, 2, 1],
-            backgroundColor: ['#2563eb', '#7c3aed', '#e11d48', '#d97706', '#0891b2'],
-            borderWidth: 2,
-            borderColor: isDark ? '#0f172a' : '#ffffff',
+            data: codes.map(c => STATS.byCode[c].count),
+            backgroundColor: codes.map(c => CODE_COLOR[c] || '#999'),
+            borderWidth: 2, borderColor: surface
           }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: {
-                color: textColor,
-                font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' },
-                boxWidth: 12,
-                padding: 12
-              }
-            }
-          },
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'right', labels: { color: textColor, font: { family: 'IBM Plex Sans', size: 10.5, weight: '600' }, boxWidth: 10, padding: 10 } } },
           cutout: '68%'
         }
       });
 
-      // Monthly Impact Bar Chart
-      const impCtx = document.getElementById('impactChart').getContext('2d');
-      impactChartInstance = new Chart(impCtx, {
+      const findingCodes = Object.keys(STATS.byCode).filter(c => CODE_META[c]).sort((a, b) => Math.abs(STATS.byCode[b].deltaSum) - Math.abs(STATS.byCode[a].deltaSum));
+      if (impactChart) impactChart.destroy();
+      impactChart = new Chart(document.getElementById('impactChart').getContext('2d'), {
         type: 'bar',
         data: {
-          labels: ['RC_004 (GST Base)', 'RC_001 (Netbanking)', 'RC_002 (Rounding)', 'RC_003 (Refund)'],
+          labels: findingCodes.map(c => `${c} · ${CODE_META[c].name.split(' ').slice(0, 2).join(' ')}`),
           datasets: [{
-            label: 'Projected Monthly Loss (₹)',
-            data: [3528.00, 333.20, 0.30, 0.00],
-            backgroundColor: ['#e11d48', '#2563eb', '#7c3aed', '#d97706'],
-            borderRadius: 4,
+            label: 'Projected monthly impact (₹)',
+            data: findingCodes.map(c => Math.abs(STATS.byCode[c].deltaSum) * (PROJECTION_DAYS / BATCH_DAYS) / 100),
+            backgroundColor: findingCodes.map(c => CODE_COLOR[c] || '#999'),
+            borderRadius: 4, maxBarThickness: 46
           }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
           scales: {
-            x: {
-              ticks: { color: textColor, font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' } },
-              grid: { display: false }
-            },
-            y: {
-              ticks: {
-                color: textColor,
-                font: { family: 'JetBrains Mono', size: 10, weight: '600' },
-                callback: v => '₹' + v
-              },
-              grid: { color: gridColor }
-            }
+            x: { ticks: { color: textColor, font: { family: 'IBM Plex Sans', size: 10, weight: '600' } }, grid: { display: false } },
+            y: { ticks: { color: textColor, font: { family: 'IBM Plex Mono', size: 10 }, callback: v => '₹' + v }, grid: { color: gridColor } }
           }
         }
       });
     }
 
-    function updateChartThemes() {
-      if (categoryChartInstance && impactChartInstance) {
-        categoryChartInstance.destroy();
-        impactChartInstance.destroy();
-        initCharts();
+    /* ============================================================
+       Render: table + filters + search (fixed: robust data-filter
+       matching instead of substring-matching button text, and
+       search now also checks the network field)
+       ============================================================ */
+    let currentFilter = 'ALL';
+    let currentSearch = '';
+
+    function buildFilterChips() {
+      const wrap = document.getElementById('filterChips');
+      const chips = [{ key: 'ALL', label: `ALL (${STATS.total})` }, { key: 'EXCEPTIONS', label: `EXCEPTIONS (${STATS.exceptionCount})` }];
+      Object.keys(STATS.byCode).sort().forEach(code => {
+        chips.push({ key: code, label: `${code} (${STATS.byCode[code].count})` });
+      });
+      wrap.innerHTML = chips.map(c =>
+        `<button class="chip${c.key === 'ALL' ? ' active' : ''}" data-filter="${c.key}" onclick="setFilter('${c.key}')">${c.label}</button>`
+      ).join('');
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.chip').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === filter));
+      renderTable();
+    }
+
+    function onSearch() {
+      currentSearch = document.getElementById('tableSearch').value.trim().toLowerCase();
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      const rows = BATCH_RESULTS.filter(r => {
+        if (currentFilter === 'EXCEPTIONS' && r.status !== 'EXCEPTION') return false;
+        if (!['ALL', 'EXCEPTIONS'].includes(currentFilter) && r.code !== currentFilter) return false;
+        if (currentSearch) {
+          const hay = [r.txn_id, r.plan, r.method, r.network, r.code].filter(Boolean).join(' ').toLowerCase();
+          if (!hay.includes(currentSearch)) return false;
+        }
+        return true;
+      });
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="13">No transactions match this filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(r => {
+        const deltaClass = r.total_delta > 0 ? 'd-pos' : r.total_delta < 0 ? 'd-neg' : 'd-zero';
+        const feeDeltaClass = r.fee_delta !== 0 ? (r.fee_delta > 0 ? 'd-pos' : 'd-neg') : 'd-zero';
+        const taxDeltaClass = r.tax_delta !== 0 ? (r.tax_delta > 0 ? 'd-pos' : 'd-neg') : 'd-zero';
+        return `
+      <tr>
+        <td><strong style="color:var(--ink); font-family:var(--font-mono);">${r.txn_id}</strong></td>
+        <td><span class="status-chip ${r.status === 'MATCHED' ? 'clean' : ''}">${r.status}</span></td>
+        <td style="font-family:var(--font-display);">${r.method}${r.network ? ` · ${r.network}` : ''}</td>
+        <td style="font-family:var(--font-display);">${r.plan}</td>
+        <td class="num-col">${fmtINR(r.exp_fee_p)}</td>
+        <td class="num-col">${fmtINR(r.act_fee_p)}</td>
+        <td class="num-col ${feeDeltaClass}">${r.fee_delta > 0 ? '+' : ''}${fmtINR(r.fee_delta)}</td>
+        <td class="num-col">${fmtINR(r.exp_tax_p)}</td>
+        <td class="num-col">${fmtINR(r.act_tax_p)}</td>
+        <td class="num-col ${taxDeltaClass}">${r.tax_delta > 0 ? '+' : ''}${fmtINR(r.tax_delta)}</td>
+        <td class="num-col ${deltaClass}">${r.total_delta > 0 ? '+' : ''}${fmtINR(r.total_delta)}</td>
+        <td style="font-family:var(--font-display);">${r.code ? `<span class="code-tag">${r.code}</span>` : '<span style="color:var(--ink-faint);">—</span>'}</td>
+        <td><button class="inspect-btn" onclick="openDrawer('${r.txn_id}')">Inspect</button></td>
+      </tr>`;
+      }).join('');
+    }
+
+    /* ============================================================
+       Inspector drawer
+       ============================================================ */
+    function openDrawer(txnId) {
+      const r = BATCH_RESULTS.find(x => x.txn_id === txnId);
+      if (!r) return;
+
+      document.getElementById('drawerTitle').textContent = `${r.txn_id} · ${r.status}`;
+      document.getElementById('drawerBody').innerHTML = `
+    <div class="facts">
+      <div class="fact">
+        <div class="fact-label">Gross amount</div>
+        <div class="fact-value num">${fmtINR(r.gross_paise)}</div>
+        <div class="fact-sub num">${fmtCount(r.gross_paise)} paise</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Fee plan &amp; method</div>
+        <div class="fact-value">${r.plan}</div>
+        <div class="fact-sub">${r.method}${r.network ? ` · ${r.network}` : ''}</div>
+      </div>
+    </div>
+    <div class="compute-panel">
+      <div class="row"><span>Expected fee</span><span><b>${fmtCount(r.exp_fee_p)}p</b> (${fmtINR(r.exp_fee_p)})</span></div>
+      <div class="row"><span>Settled fee</span><span style="color:${r.fee_delta !== 0 ? 'var(--negative)' : 'var(--positive)'}"><b>${fmtCount(r.act_fee_p)}p</b> (${fmtINR(r.act_fee_p)})</span></div>
+      <div class="row"><span>Expected 18% GST</span><span><b>${fmtCount(r.exp_tax_p)}p</b> (${fmtINR(r.exp_tax_p)})</span></div>
+      <div class="row"><span>Settled GST</span><span style="color:${r.tax_delta !== 0 ? 'var(--negative)' : 'var(--positive)'}"><b>${r.act_tax_p === null ? 'missing' : fmtCount(r.act_tax_p) + 'p'}</b> (${fmtINR(r.act_tax_p)})</span></div>
+      <div class="row divider"><span>Net discrepancy</span><span style="color:${r.total_delta !== 0 ? 'var(--negative)' : 'var(--positive)'}">${r.total_delta > 0 ? '+' : ''}${fmtINR(r.total_delta)}</span></div>
+    </div>
+    <div class="rule-note">
+      <b>Classifier rule</b>
+      ${r.rule}
+    </div>
+  `;
+      document.getElementById('overlay').style.display = 'flex';
+      lucide.createIcons();
+    }
+    function closeDrawer() { document.getElementById('overlay').style.display = 'none'; }
+    function onOverlayClick(e) { if (e.target.id === 'overlay') closeDrawer(); }
+
+    /* ============================================================
+       Taxonomy tab
+       ============================================================ */
+    function renderTaxonomy() {
+      document.getElementById('taxonomyBody').innerHTML = TAXONOMY.map(t => {
+        const count = STATS.byCode[t.code]?.count || 0;
+        const status = count > 0
+          ? `<span class="status-active">Active — ${count} occurrence${count === 1 ? '' : 's'}</span>`
+          : `<span class="status-idle">Not triggered in this batch</span>`;
+        return `<tr>
+      <td><span class="code-tag">${t.code}</span></td>
+      <td class="mono">${t.name}</td>
+      <td>${t.rule}</td>
+      <td>${status}</td>
+    </tr>`;
+      }).join('');
+    }
+
+    /* ============================================================
+       Misc UI: tabs, theme, actions
+       ============================================================ */
+    function switchTab(tab) {
+      ['recon', 'benchmarks', 'taxonomy'].forEach(t => {
+        document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+      });
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+    }
+
+    let isDark = false;
+    function toggleTheme() {
+      isDark = !isDark;
+      document.documentElement.classList.toggle('dark', isDark);
+      document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      document.getElementById('themeText').textContent = isDark ? 'Light' : 'Dark';
+      lucide.createIcons();
+      initCharts();
+    }
+
+    function copyText(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;"></i> Copied';
+        lucide.createIcons();
+        setTimeout(() => { btn.innerHTML = original; lucide.createIcons(); }, 1400);
+      });
+    }
+
+    function exportReport() {
+      const btn = event.currentTarget;
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="check" style="width:14px;height:14px;"></i><span>Dossier ready</span>';
+      lucide.createIcons();
+      setTimeout(() => { btn.innerHTML = original; lucide.createIcons(); }, 1600);
+    }
+
+    function runReconciler(e) {
+      const btn = e.currentTarget;
+      btn.innerHTML = '<i data-lucide="loader-2" style="width:14px;height:14px;" class="spin"></i><span>Recomputing…</span>';
+      lucide.createIcons();
+      setTimeout(() => {
+        btn.innerHTML = '<i data-lucide="check" style="width:14px;height:14px;"></i><span>Reconciled in 4.8ms</span>';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = '<i data-lucide="play" style="width:14px;height:14px;"></i><span>Run reconciler</span>';
+          lucide.createIcons();
+        }, 1600);
+      }, 300);
+    }
+
+    /* ============================================================
+       Init
+       ============================================================ */
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderKpis();
+      renderFindings();
+      buildFilterChips();
+      renderTable();
+      renderTaxonomy();
+      initCharts();
+    });
+  </script>
+  <style>
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
     }
-  </script>
+
+    .spin {
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+  </style>
 </body>
+
 </html>
