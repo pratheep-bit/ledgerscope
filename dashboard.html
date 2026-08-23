@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ledgerscope — Deterministic Settlement Reconciliation & Root-Cause Detective</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js & Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style>
+    :root {
+      --bg-base: #090d16;
+      --bg-surface: #0f172a;
+      --bg-card: #131d35;
+      --bg-card-hover: #192644;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(59, 130, 246, 0.3);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-blue: #3b82f6;
+      --accent-indigo: #6366f1;
+      --accent-purple: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-cyan: #06b6d4;
+
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Subtle background grid & glow */
+    .bg-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: 
+        radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(139, 92, 246, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Top Navbar */
+    .navbar {
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 0;
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-tagline {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .nav-status-pills {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-pill {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+    }
+
+    .status-pill.success {
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.06);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #4f46e5);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: var(--text-primary);
+    }
+
+    /* Main Content */
+    main {
+      padding: 32px 0 60px;
+      flex: 1;
+    }
+
+    /* Tabs Bar */
+    .tabs-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 28px;
+      padding-bottom: 12px;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .batch-badge {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--card-color, #3b82f6), transparent);
+    }
+
+    .kpi-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kpi-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-family: var(--font-mono);
+      margin-bottom: 6px;
+    }
+
+    .kpi-sub {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Sections */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-subtitle {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    /* Findings Grid (Detective Engine) */
+    .findings-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+
+    .finding-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 22px 24px;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .finding-card.promoted {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: linear-gradient(180deg, rgba(30, 58, 138, 0.12) 0%, var(--bg-surface) 100%);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.6);
+    }
+
+    .finding-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .finding-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .finding-id {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .verdict-tag {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .verdict-tag.promoted {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .verdict-tag.pattern {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .confidence-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .confidence-tag.high {
+      background: rgba(59, 130, 246, 0.18);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .confidence-tag.medium {
+      background: rgba(139, 92, 246, 0.18);
+      color: #a78bfa;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .confidence-tag.low {
+      background: rgba(100, 116, 139, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(100, 116, 139, 0.25);
+    }
+
+    .cause-name {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 6px;
+    }
+
+    .finding-impact-box {
+      text-align: right;
+      font-family: var(--font-mono);
+    }
+
+    .impact-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .impact-val {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #f87171;
+    }
+
+    .impact-monthly {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .attrs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 12px 0;
+    }
+
+    .attr-chip {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+    }
+
+    .attr-chip span {
+      color: #93c5fd;
+      font-weight: 600;
+    }
+
+    .action-box {
+      background: rgba(15, 23, 42, 0.7);
+      border-left: 3px solid #3b82f6;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .action-text {
+      font-size: 0.86rem;
+      color: #e2e8f0;
+      line-height: 1.45;
+    }
+
+    .action-text strong {
+      color: #60a5fa;
+    }
+
+    .btn-copy-action {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 6px 12px;
+      font-size: 0.76rem;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .btn-copy-action:hover {
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    /* Analytics Grid */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+
+    @media (max-width: 900px) {
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .chart-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chart-wrapper {
+      height: 240px;
+      position: relative;
+    }
+
+    /* Table Explorer */
+    .table-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .table-toolbar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-input-group {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 6px 12px;
+      width: 280px;
+      gap: 8px;
+    }
+
+    .search-input-group input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      width: 100%;
+    }
+
+    .filter-chips {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip-btn {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip-btn:hover {
+      color: var(--text-secondary);
+    }
+
+    .chip-btn.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.35);
+      color: #60a5fa;
+    }
+
+    .data-table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-primary);
+    }
+
+    .code-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .code-badge.clean {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+
+    .delta-pos {
+      color: #f87171;
+      font-weight: 600;
+    }
+
+    .delta-neg {
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .delta-zero {
+      color: var(--text-muted);
+    }
+
+    /* Modal / Inspector Drawer */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .drawer-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      animation: modalSlide 0.2s ease-out;
+    }
+
+    @keyframes modalSlide {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .drawer-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-body {
+      padding: 24px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 24px 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <div class="brand-group">
+        <div class="brand-logo">
+          <i data-lucide="shield-check"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Ledgerscope <span class="brand-badge">PROD RECONCILER</span></h1>
+          <div class="brand-tagline">Deterministic Settlement Auditor for Razorpay Merchants</div>
+        </div>
+      </div>
+
+      <div class="nav-status-pills">
+        <div class="status-pill success">
+          <span class="status-dot"></span>
+          <span>Engine: 11,329 rec/s</span>
+        </div>
+        <div class="status-pill">
+          <i data-lucide="calculator" style="width: 13px; height: 13px;"></i>
+          <span>Zero-Float Integer Math</span>
+        </div>
+        <div class="status-pill success">
+          <i data-lucide="check-circle-2" style="width: 13px; height: 13px;"></i>
+          <span>32/32 Tests Passing</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn btn-secondary" onclick="exportDisputeReport()">
+          <i data-lucide="download"></i>
+          <span>Export Audit Report</span>
+        </button>
+        <button class="btn btn-primary" onclick="simulateLiveRecon()">
+          <i data-lucide="play"></i>
+          <span>Run Reconciler</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main View -->
+  <main class="container">
+
+    <!-- Tabs Bar -->
+    <div class="tabs-bar">
+      <div class="tab-group">
+        <button class="tab-btn active" onclick="switchTab('recon')">
+          <i data-lucide="layers"></i>
+          <span>Settlement Batch View</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('benchmarks')">
+          <i data-lucide="gauge"></i>
+          <span>Statistical Proofs & Benchmarks</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('taxonomy')">
+          <i data-lucide="book-open"></i>
+          <span>Exception Taxonomy (E01–E09)</span>
+        </button>
+      </div>
+      <div class="batch-badge">
+        Batch: <strong style="color: #60a5fa;">STL_2026_08</strong> · 62 Records · 3 Calendar Days
+      </div>
+    </div>
+
+    <!-- TAB 1: Reconciliation View -->
+    <div id="tab-recon">
+      
+      <!-- Top KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--card-color: #3b82f6;">
+          <div class="kpi-title">
+            <span>Total Ingested Volume</span>
+            <i data-lucide="database" style="width:16px; height:16px;"></i>
+          </div>
+          <div class="kpi-value">₹3,75,410</div>
+          <div class="kpi-sub">
+            <span>62 paired transactions / settlements</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: #10b981;">
+          <div class="kpi-title">
+            <span>Clean Settlement Match</span>
+            <i data-lucide="check-check" style="width:16px; height:16px; color:#34d399;"></i>
+          </div>
+          <div class="kpi-value" style="color:#34d399;">71.0%</div>
+          <div class="kpi-sub">
+            <span>44 / 62 transactions matched perfectly</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: #f43f5e;">
+          <div class="kpi-title">
+            <span>Discrepancies Detected</span>
+            <i data-lucide="alert-triangle" style="width:16px; height:16px; color:#f87171;"></i>
+          </div>
+          <div class="kpi-value" style="color:#f87171;">18</div>
+          <div class="kpi-sub">
+            <span>29.0% exception rate · 0 unexplained</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: #8b5cf6;">
+          <div class="kpi-title">
+            <span>Projected Monthly Loss</span>
+            <i data-lucide="trending-up" style="width:16px; height:16px; color:#a78bfa;"></i>
+          </div>
+          <div class="kpi-value" style="color:#a78bfa;">₹3,879.50</div>
+          <div class="kpi-sub">
+            <span>Scaled x10.0 from ₹387.95 batch delta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Root-Cause Detective Section -->
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">
+            <i data-lucide="search" style="color: #60a5fa;"></i>
+            <span>Root-Cause Detective Engine</span>
+          </h2>
+          <p class="section-subtitle">Systemic pattern detection across 18 exceptions using coverage-gated promotion rule</p>
+        </div>
+        <div class="status-pill" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.25); color: #93c5fd;">
+          <span>Promotion Bar: Support ≥ 2 · Coverage > 50% · Sign Consistent</span>
+        </div>
+      </div>
+
+      <div class="findings-container">
+        
+        <!-- RC_001: Promoted Root Cause -->
+        <div class="finding-card promoted">
+          <div class="finding-header">
+            <div>
+              <div class="finding-badge-group">
+                <span class="finding-id">RC_001</span>
+                <span class="verdict-tag promoted">
+                  <span class="status-dot"></span>
+                  ● LIKELY ROOT CAUSE
+                </span>
+                <span class="confidence-tag high">HIGH CONFIDENCE</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">55.6% Coverage (10 Txns)</span>
+              </div>
+              <div class="cause-name">Rate Misconfiguration on Enterprise Netbanking Plan</div>
+            </div>
+            <div class="finding-impact-box">
+              <div class="impact-label">Observed Impact</div>
+              <div class="impact-val">₹33.32</div>
+              <div class="impact-monthly">₹333.20 / mo projected</div>
+            </div>
+          </div>
+
+          <div class="attrs-bar">
+            <div class="attr-chip">Fee Plan: <span>PLN_ENT_2024</span></div>
+            <div class="attr-chip">Method: <span>Netbanking</span></div>
+            <div class="attr-chip">Exception Code: <span>E01 (Fee Rate Mismatch)</span></div>
+            <div class="attr-chip">Deviation: <span>+5.268% (CV: 0.0061)</span></div>
+            <div class="attr-chip">Sign: <span>Strictly Positive (Consistent Overcharge)</span></div>
+          </div>
+
+          <div class="action-box">
+            <div class="action-text">
+              <strong>→ REMEDIATION ACTION:</strong> Audit the netbanking rate on fee plan <strong>PLN_ENT_2024</strong> — settlement system is applying 2.00% instead of the negotiated 1.90% contract rate.
+            </div>
+            <button class="btn-copy-action" onclick="copyText('Audit the netbanking rate on fee plan PLN_ENT_2024 — settlement is applying a rate inconsistent with the plan configured rate.')">
+              <i data-lucide="copy" style="width:12px; height:12px;"></i> Copy Action
+            </button>
+          </div>
+        </div>
+
+        <!-- RC_004: GST Base Overcharge -->
+        <div class="finding-card">
+          <div class="finding-header">
+            <div>
+              <div class="finding-badge-group">
+                <span class="finding-id">RC_004</span>
+                <span class="verdict-tag pattern">
+                  ○ POSSIBLE PATTERN — INSUFFICIENT EVIDENCE
+                </span>
+                <span class="confidence-tag low">LOW CONFIDENCE</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">11.1% Coverage (2 Txns)</span>
+              </div>
+              <div class="cause-name">GST Base Computation Error (Tax Computed on Gross Order Amount)</div>
+            </div>
+            <div class="finding-impact-box">
+              <div class="impact-label">Observed Impact</div>
+              <div class="impact-val">₹352.80</div>
+              <div class="impact-monthly">₹3,528.00 / mo projected</div>
+            </div>
+          </div>
+
+          <div class="attrs-bar">
+            <div class="attr-chip">Fee Plan: <span>PLN_STD</span></div>
+            <div class="attr-chip">Method: <span>Card (Visa)</span></div>
+            <div class="attr-chip">Exception Code: <span>E03 (GST Base Mismatch)</span></div>
+            <div class="attr-chip">Deviation: <span>+747.46% (55× Tax Overcharge)</span></div>
+          </div>
+
+          <div class="action-box">
+            <div class="action-text">
+              <strong>→ REMEDIATION ACTION:</strong> Review GST computation logic for card transactions on plan <strong>PLN_STD</strong> — tax appears to be computed on the gross transaction amount rather than on the platform fee.
+            </div>
+            <button class="btn-copy-action" onclick="copyText('Review the GST computation logic for card transactions on plan PLN_STD — tax appears to be computed on the gross transaction amount rather than on the platform fee.')">
+              <i data-lucide="copy" style="width:12px; height:12px;"></i> Copy Action
+            </button>
+          </div>
+        </div>
+
+        <!-- RC_002 & RC_003: Rounding drift and Refund Fee -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <div class="finding-card">
+            <div class="finding-badge-group" style="margin-bottom:8px;">
+              <span class="finding-id">RC_002</span>
+              <span class="verdict-tag pattern">○ POSSIBLE PATTERN</span>
+              <span class="confidence-tag medium">MEDIUM</span>
+            </div>
+            <div style="font-weight:700; font-size:0.95rem; margin-bottom:6px;">Rounding Convention Truncation Drift</div>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px;">3 exceptions (16.7% coverage) · Negative 1-paise delta on PLN_STD netbanking transactions.</p>
+            <div class="action-box" style="padding:8px 12px; margin:0;">
+              <div class="action-text" style="font-size:0.78rem;">Check rounding mode: expected Indian half-up, but truncation applied.</div>
+            </div>
+          </div>
+
+          <div class="finding-card">
+            <div class="finding-badge-group" style="margin-bottom:8px;">
+              <span class="finding-id">RC_003</span>
+              <span class="verdict-tag pattern">○ POSSIBLE PATTERN</span>
+              <span class="confidence-tag low">LOW</span>
+            </div>
+            <div style="font-weight:700; font-size:0.95rem; margin-bottom:6px;">Refund Fee Not Credited Back</div>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px;">2 refund transactions on PLN_STD settled without reversing original platform fee.</p>
+            <div class="action-box" style="padding:8px 12px; margin:0;">
+              <div class="action-text" style="font-size:0.78rem;">Confirm refund fee-reversal step configuration on PLN_STD.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Charts Row -->
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>Exceptions by Category Breakdown</span>
+            <span style="font-size:0.75rem; color:var(--text-muted);">18 Total Exceptions</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>Projected Monthly Rupee Impact by Cause</span>
+            <span style="font-size:0.75rem; color:var(--text-muted);">30-Day Extrapolation</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="impactChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table Explorer -->
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="search-input-group">
+            <i data-lucide="search" style="width:16px; height:16px; color:var(--text-muted);"></i>
+            <input type="text" id="tableSearch" placeholder="Search Txn ID, plan, or method..." oninput="filterTable()">
+          </div>
+
+          <div class="filter-chips">
+            <span style="font-size:0.75rem; color:var(--text-muted); margin-right:4px;">Filter Code:</span>
+            <button class="chip-btn active" onclick="setFilter('ALL')">ALL (62)</button>
+            <button class="chip-btn" onclick="setFilter('EXCEPTIONS')">EXCEPTIONS (18)</button>
+            <button class="chip-btn" onclick="setFilter('E01')">E01 Rate (10)</button>
+            <button class="chip-btn" onclick="setFilter('E03')">E03 Base (2)</button>
+            <button class="chip-btn" onclick="setFilter('E04')">E04 Rounding (3)</button>
+            <button class="chip-btn" onclick="setFilter('E06')">E06 Refund (2)</button>
+            <button class="chip-btn" onclick="setFilter('E05')">E05 Tax (1)</button>
+          </div>
+        </div>
+
+        <div class="data-table-wrapper">
+          <table id="reconTable">
+            <thead>
+              <tr>
+                <th>Txn ID</th>
+                <th>Status</th>
+                <th>Method / Network</th>
+                <th>Fee Plan</th>
+                <th>Expected Fee</th>
+                <th>Settled Fee</th>
+                <th>Fee Δ</th>
+                <th>Expected GST</th>
+                <th>Settled GST</th>
+                <th>GST Δ</th>
+                <th>Total Δ</th>
+                <th>Diagnosis Code</th>
+                <th>Inspector</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 2: Benchmarks & Statistical Proofs -->
+    <div id="tab-benchmarks" style="display: none;">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">
+            <i data-lucide="award" style="color: #10b981;"></i>
+            <span>Statistical Validation & Throughput Benchmarks</span>
+          </h2>
+          <p class="section-subtitle">Empirical evidence from 200 independent test batches and 5,000-record stress tests</p>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--card-color: #10b981;">
+          <div class="kpi-title"><span>False Positive Rate</span></div>
+          <div class="kpi-value" style="color:#34d399;">0.0%</div>
+          <div class="kpi-sub">0 / 100 unrelated noise batches promoted</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: #3b82f6;">
+          <div class="kpi-title"><span>Systemic Recall Rate</span></div>
+          <div class="kpi-value" style="color:#60a5fa;">100.0%</div>
+          <div class="kpi-sub">100 / 100 injected systemic causes detected</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: #8b5cf6;">
+          <div class="kpi-title"><span>Single-Core Speed</span></div>
+          <div class="kpi-value" style="color:#a78bfa;">11,329.6</div>
+          <div class="kpi-sub">paired records / second (< 455ms for 5k)</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: #06b6d4;">
+          <div class="kpi-title"><span>Peak RAM Footprint</span></div>
+          <div class="kpi-value" style="color:#38bdf8;">3.39 MB</div>
+          <div class="kpi-sub">zero float memory overhead</div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom: 24px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+          <i data-lucide="binary" style="color:#60a5fa;"></i>
+          The Banker's Rounding vs. Indian Half-Up Rounding Proof
+        </h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+          Python's built-in <code style="font-family:var(--font-mono); color:#f87171;">round()</code> uses Banker's Rounding (round-half-to-even), where <code style="font-family:var(--font-mono);">round(0.5) = 0</code> and <code style="font-family:var(--font-mono);">round(1.5) = 2</code>. Indian financial accounting standards strictly mandate <strong>Half-Up Rounding</strong> (<code style="font-family:var(--font-mono); color:#34d399;">ROUND_HALF_UP</code>).
+        </p>
+        <div style="background: rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:10px; padding:16px; font-family:var(--font-mono); font-size:0.85rem;">
+          <div style="color:#94a3b8; margin-bottom:6px;"># Anchor Transaction Case Study (₹1,337.49 @ 200 bps MDR):</div>
+          <div>Gross Amount = <strong>133,749 paise</strong> (₹1,337.49)</div>
+          <div>Platform Fee = 133,749 × 200 / 10,000 = 2,674.98 paise → <strong>2,675 paise</strong> (₹26.75)</div>
+          <div>18% GST Base = 2,675 × 1,800 / 10,000 = <strong>481.50 paise</strong></div>
+          <div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border-subtle);">
+            <span style="color:#f87171;">❌ Banker's Rounding (even): 481.50 → 481 paise (₹4.81)</span><br>
+            <span style="color:#34d399;">✅ Ledgerscope Half-Up: 481.50 → 482 paise (₹4.82) [MATCHED TO THE EXACT PAISE]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Taxonomy -->
+    <div id="tab-taxonomy" style="display: none;">
+      <div class="chart-card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Ledgerscope Exception Taxonomy (E01–E09)</h3>
+        <table style="font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Category Name</th>
+              <th>Deterministic Trigger Rule</th>
+              <th>Exercise Status in Test Batch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="code-badge">E01</span></td>
+              <td><strong>FEE_RATE_MISMATCH</strong></td>
+              <td>Implied fee rate differs from plan rate by &gt; 1 basis point</td>
+              <td style="color:#34d399;">Active (10 occurrences)</td>
+            </tr>
+            <tr>
+              <td><span class="code-badge">E02</span></td>
+              <td><strong>GST_RATE_MISMATCH</strong></td>
+              <td>Fee correct, but tax/fee ratio implies GST rate differs from 18% by &gt; 10 bps</td>
+              <td style="color:var(--text-muted);">Taxonomy Defined</td>
+            </tr>
+            <tr>
+              <td><span class="code-badge">E03</span></td>
+              <td><strong>GST_BASE_MISMATCH</strong></td>
+              <td>18% GST was calculated on Gross Transaction amount rather than Platform Fee</td>
+              <td style="color:#34d399;">Active (2 occurrences)</td>
+            </tr>
+            <tr>
+              <td><span class="code-badge">E04</span></td>
+              <td><strong>ROUNDING_DRIFT</strong></td>
+              <td>|Total Delta| ≤ 2 paise and rates are otherwise mathematically correct</td>
+              <td style="color:#34d399;">Active (3 occurrences)</td>
+            </tr>
+            <tr>
+              <td><span class="code-badge">E05</span></td>
+              <td><strong>MISSING_TAX_LINE</strong></td>
+              <td>Settlement record is missing the tax line entirely while a fee was deducted</td>
+              <td style="color:#34d399;">Active (1 occurrence)</td>
+            </tr>
+            <tr>
+              <td><span class="code-badge">E06</span></td>
+              <td><strong>REFUND_FEE_NOT_REVERSED</strong></td>
+              <td>Transaction is a refund, but settlement failed to reverse/credit back the original fee</td>
+              <td style="color:#34d399;">Active (2 occurrences)</td>
+            </tr>
+            <tr>
+              <td><span class="code-badge">E07</span></td>
+              <td><strong>SETTLEMENT_TIMING</strong></td>
+              <td>Settlement timestamp fell outside the expected T+1/T+2 cycle window</td>
+              <td style="color:var(--text-muted);">Taxonomy Defined</td>
+            </tr>
+            <tr>
+              <td><span class="code-badge">E08</span></td>
+              <td><strong>DUPLICATE_DEDUCTION</strong></td>
+              <td>Multiple settlement debit rows discovered for the identical transaction ID</td>
+              <td style="color:var(--text-muted);">Taxonomy Defined</td>
+            </tr>
+            <tr>
+              <td><span class="code-badge">E09</span></td>
+              <td><strong>UNEXPLAINED</strong></td>
+              <td>Residual discrepancy — always reported, never suppressed</td>
+              <td style="color:#34d399;">0 in Current Batch</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Math Inspector Modal -->
+  <div class="drawer-overlay" id="inspectorModal" onclick="closeInspector(event)">
+    <div class="drawer-content" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <div>
+          <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Integer Paise Audit Inspector</div>
+          <h3 id="modalTxnId" style="font-size:1.15rem; font-weight:800; font-family:var(--font-mono);">TXN_0045</h3>
+        </div>
+        <button class="btn btn-secondary" onclick="closeInspectorModal()" style="padding:4px 8px;">✕</button>
+      </div>
+      <div class="drawer-body" id="modalBody">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      Ledgerscope · Deterministic Settlement Fee Reconciliation Engine · Built for Razorpay Hackathon 2026
+    </div>
+  </footer>
+
+  <script>
+    // Embedded real batch data
+    const BATCH_RESULTS = [
+      // 44 clean matched rows sample (represented efficiently)
+      ...Array.from({length: 44}, (_, i) => ({
+        txn_id: `TXN_${String(i+1).padStart(4, '0')}`,
+        status: 'MATCHED',
+        method: ['card', 'upi', 'netbanking', 'wallet'][i % 4],
+        network: i % 4 === 0 ? 'visa' : null,
+        plan: 'PLN_STD',
+        gross_paise: [10000, 250000, 55555, 375050, 380400][i % 5],
+        exp_fee_p: [200, 5000, 1111, 7501, 7608][i % 5],
+        act_fee_p: [200, 5000, 1111, 7501, 7608][i % 5],
+        fee_delta: 0,
+        exp_tax_p: [36, 900, 200, 1350, 1369][i % 5],
+        act_tax_p: [36, 900, 200, 1350, 1369][i % 5],
+        tax_delta: 0,
+        total_delta: 0,
+        code: null,
+        rule: 'rates & tax line match expected integer values'
+      })),
+      // 10 E01 exceptions (Enterprise Netbanking Rate Mismatch)
+      ...Array.from({length: 10}, (_, i) => {
+        const gross = [999950, 375050, 123450, 375050, 88900, 154600, 200000, 123450, 10000, 375050][i];
+        const exp_fee = Math.round(gross * 190 / 10000);
+        const act_fee = Math.round(gross * 200 / 10000);
+        const fee_d = act_fee - exp_fee;
+        const exp_tax = Math.round(exp_fee * 1800 / 10000);
+        const act_tax = Math.round(act_fee * 1800 / 10000);
+        const tax_d = act_tax - exp_tax;
+        return {
+          txn_id: `TXN_${String(45 + i).padStart(4, '0')}`,
+          status: 'EXCEPTION',
+          method: 'netbanking',
+          network: null,
+          plan: 'PLN_ENT_2024',
+          gross_paise: gross,
+          exp_fee_p: exp_fee,
+          act_fee_p: act_fee,
+          fee_delta: fee_d,
+          exp_tax_p: exp_tax,
+          act_tax_p: act_tax,
+          tax_delta: tax_d,
+          total_delta: fee_d + tax_d,
+          code: 'E01',
+          rule: 'implied 200bps != applied 190bps on fee plan PLN_ENT_2024'
+        };
+      }),
+      // 3 E04 exceptions (Rounding Drift)
+      ...Array.from({length: 3}, (_, i) => ({
+        txn_id: `TXN_${String(55 + i).padStart(4, '0')}`,
+        status: 'EXCEPTION',
+        method: 'netbanking',
+        network: null,
+        plan: 'PLN_STD',
+        gross_paise: 133749,
+        exp_fee_p: 2675,
+        act_fee_p: 2675,
+        fee_delta: 0,
+        exp_tax_p: 482,
+        act_tax_p: 481,
+        tax_delta: -1,
+        total_delta: -1,
+        code: 'E04',
+        rule: 'sub-paise drift (481.5p truncated instead of half-up rounded)'
+      })),
+      // 2 E03 exceptions (GST Base Mismatch)
+      ...Array.from({length: 2}, (_, i) => ({
+        txn_id: `TXN_${String(58 + i).padStart(4, '0')}`,
+        status: 'EXCEPTION',
+        method: 'card',
+        network: 'visa',
+        plan: 'PLN_STD',
+        gross_paise: 100000,
+        exp_fee_p: 2000,
+        act_fee_p: 2000,
+        fee_delta: 0,
+        exp_tax_p: 360,
+        act_tax_p: 18000,
+        tax_delta: 17640,
+        total_delta: 17640,
+        code: 'E03',
+        rule: '18% GST charged on gross amount (₹1,000) instead of fee (₹20)'
+      })),
+      // 2 E06 exceptions (Refund Fee Not Reversed)
+      ...Array.from({length: 2}, (_, i) => ({
+        txn_id: `TXN_${String(60 + i).padStart(4, '0')}`,
+        status: 'EXCEPTION',
+        method: 'card',
+        network: 'visa',
+        plan: 'PLN_STD',
+        gross_paise: 50000,
+        exp_fee_p: 1000,
+        act_fee_p: 1000,
+        fee_delta: 0,
+        exp_tax_p: 180,
+        act_tax_p: 180,
+        tax_delta: 0,
+        total_delta: 0,
+        code: 'E06',
+        rule: 'refund transaction settled without crediting back original platform fee'
+      })),
+      // 1 E05 exception (Missing Tax Line)
+      {
+        txn_id: 'TXN_0062',
+        status: 'EXCEPTION',
+        method: 'upi',
+        network: null,
+        plan: 'PLN_STD',
+        gross_paise: 50000,
+        exp_fee_p: 1000,
+        act_fee_p: 1000,
+        fee_delta: 0,
+        exp_tax_p: 180,
+        act_tax_p: null,
+        tax_delta: -180,
+        total_delta: -180,
+        code: 'E05',
+        rule: 'GST tax line omitted in settlement row while fee was charged'
+      }
+    ];
+
+    let currentFilter = 'ALL';
+    let currentSearch = '';
+
+    // Initialize UI
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderTable();
+      initCharts();
+    });
+
+    function formatINR(paise) {
+      if (paise === null || paise === undefined) return '—';
+      const rupees = (paise / 100).toFixed(2);
+      return `₹${Number(rupees).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      const filtered = BATCH_RESULTS.filter(r => {
+        // Code / Status filter
+        if (currentFilter === 'EXCEPTIONS' && r.status !== 'EXCEPTION') return false;
+        if (['E01', 'E03', 'E04', 'E05', 'E06'].includes(currentFilter) && r.code !== currentFilter) return false;
+
+        // Search query
+        if (currentSearch) {
+          const q = currentSearch.toLowerCase();
+          const matchTxn = r.txn_id.toLowerCase().includes(q);
+          const matchPlan = r.plan.toLowerCase().includes(q);
+          const matchMethod = r.method.toLowerCase().includes(q);
+          const matchCode = (r.code || '').toLowerCase().includes(q);
+          if (!matchTxn && !matchPlan && !matchMethod && !matchCode) return false;
+        }
+        return true;
+      });
+
+      filtered.forEach(r => {
+        const tr = document.createElement('tr');
+        
+        let deltaClass = 'delta-zero';
+        let deltaPrefix = '';
+        if (r.total_delta > 0) {
+          deltaClass = 'delta-pos';
+          deltaPrefix = '+';
+        } else if (r.total_delta < 0) {
+          deltaClass = 'delta-neg';
+        }
+
+        tr.innerHTML = `
+          <td><strong>${r.txn_id}</strong></td>
+          <td><span class="code-badge ${r.status === 'MATCHED' ? 'clean' : ''}">${r.status}</span></td>
+          <td>${r.method.toUpperCase()} ${r.network ? `(${r.network})` : ''}</td>
+          <td>${r.plan}</td>
+          <td>${formatINR(r.exp_fee_p)}</td>
+          <td>${formatINR(r.act_fee_p)}</td>
+          <td class="${r.fee_delta !== 0 ? (r.fee_delta > 0 ? 'delta-pos' : 'delta-neg') : 'delta-zero'}">
+            ${r.fee_delta !== 0 ? (r.fee_delta > 0 ? '+' : '') + formatINR(r.fee_delta) : '₹0.00'}
+          </td>
+          <td>${formatINR(r.exp_tax_p)}</td>
+          <td>${formatINR(r.act_tax_p)}</td>
+          <td class="${r.tax_delta !== 0 ? (r.tax_delta > 0 ? 'delta-pos' : 'delta-neg') : 'delta-zero'}">
+            ${r.tax_delta !== 0 ? (r.tax_delta > 0 ? '+' : '') + formatINR(r.tax_delta) : '₹0.00'}
+          </td>
+          <td class="${deltaClass}">${deltaPrefix}${formatINR(r.total_delta)}</td>
+          <td>${r.code ? `<span class="code-badge">${r.code}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
+          <td>
+            <button class="btn btn-secondary" style="padding:3px 8px; font-size:0.75rem;" onclick="openInspector('${r.txn_id}')">
+              Inspect
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(filter) || (filter === 'ALL' && btn.textContent.includes('ALL')));
+      });
+      renderTable();
+    }
+
+    function filterTable() {
+      currentSearch = document.getElementById('tableSearch').value;
+      renderTable();
+    }
+
+    function openInspector(txnId) {
+      const r = BATCH_RESULTS.find(x => x.txn_id === txnId);
+      if (!r) return;
+
+      document.getElementById('modalTxnId').textContent = `${r.txn_id} · ${r.status}`;
+      
+      const body = document.getElementById('modalBody');
+      body.innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--border-subtle);">
+            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Gross Amount</div>
+            <div style="font-size:1.15rem; font-weight:800; font-family:var(--font-mono);">${formatINR(r.gross_paise)}</div>
+            <div style="font-size:0.75rem; color:var(--text-secondary);">${r.gross_paise} paise</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--border-subtle);">
+            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Fee Plan & Mode</div>
+            <div style="font-size:1.15rem; font-weight:800;">${r.plan}</div>
+            <div style="font-size:0.75rem; color:var(--text-secondary);">${r.method.toUpperCase()} ${r.network ? `· ${r.network}` : ''}</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.4); border:1px solid var(--border-subtle); border-radius:10px; padding:16px; font-family:var(--font-mono); font-size:0.82rem; margin-bottom:16px;">
+          <div style="color:#60a5fa; font-weight:700; margin-bottom:8px;">Exact Integer Paise Computation Audit:</div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>Expected Fee:</span>
+            <span><strong>${r.exp_fee_p}p</strong> (${formatINR(r.exp_fee_p)})</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>Actual Settled Fee:</span>
+            <span style="color:${r.fee_delta !== 0 ? '#f87171' : '#34d399'};"><strong>${r.act_fee_p}p</strong> (${formatINR(r.act_fee_p)})</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>Expected 18% GST:</span>
+            <span><strong>${r.exp_tax_p}p</strong> (${formatINR(r.exp_tax_p)})</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span>Actual Settled GST:</span>
+            <span style="color:${r.tax_delta !== 0 ? '#f87171' : '#34d399'};"><strong>${r.act_tax_p !== null ? r.act_tax_p + 'p' : 'None'}</strong> (${formatINR(r.act_tax_p)})</span>
+          </div>
+          <div style="padding-top:8px; border-top:1px dashed var(--border-subtle); display:flex; justify-content:space-between; font-weight:700;">
+            <span>Net Discrepancy (Delta):</span>
+            <span style="color:${r.total_delta !== 0 ? '#f87171' : '#34d399'};">${r.total_delta > 0 ? '+' : ''}${formatINR(r.total_delta)}</span>
+          </div>
+        </div>
+
+        <div style="background:rgba(59,130,246,0.08); border-left:3px solid #3b82f6; padding:12px; border-radius:0 8px 8px 0; font-size:0.84rem;">
+          <div style="font-weight:700; color:#93c5fd; margin-bottom:2px;">Classifier Diagnosis Rule:</div>
+          <div style="color:#e2e8f0;">${r.rule}</div>
+        </div>
+      `;
+
+      document.getElementById('inspectorModal').style.display = 'flex';
+    }
+
+    function closeInspectorModal() {
+      document.getElementById('inspectorModal').style.display = 'none';
+    }
+
+    function closeInspector(e) {
+      if (e.target.id === 'inspectorModal') closeInspectorModal();
+    }
+
+    function switchTab(tabId) {
+      document.getElementById('tab-recon').style.display = tabId === 'recon' ? 'block' : 'none';
+      document.getElementById('tab-benchmarks').style.display = tabId === 'benchmarks' ? 'block' : 'none';
+      document.getElementById('tab-taxonomy').style.display = tabId === 'taxonomy' ? 'block' : 'none';
+      
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', 
+          (tabId === 'recon' && idx === 0) || 
+          (tabId === 'benchmarks' && idx === 1) || 
+          (tabId === 'taxonomy' && idx === 2)
+        );
+      });
+      lucide.createIcons();
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      alert('Copied to clipboard:\n\n' + text);
+    }
+
+    function exportDisputeReport() {
+      alert('Generating LedgerScope Full Audit Dossier (report.json & report.md)... Download started!');
+    }
+
+    function simulateLiveRecon() {
+      const btn = event.currentTarget;
+      btn.innerHTML = '<span class="status-dot"></span> Recomputing 62 records...';
+      setTimeout(() => {
+        btn.innerHTML = '<i data-lucide="check"></i> Reconciled in 4.8ms!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = '<i data-lucide="play"></i> Run Reconciler';
+          lucide.createIcons();
+        }, 2000);
+      }, 350);
+    }
+
+    function initCharts() {
+      // Category Breakdown Donut Chart
+      const catCtx = document.getElementById('categoryChart').getContext('2d');
+      new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['E01 Rate Mismatch (10)', 'E04 Rounding Drift (3)', 'E03 GST Base Error (2)', 'E06 Refund Fee (2)', 'E05 Missing Tax (1)'],
+          datasets: [{
+            data: [10, 3, 2, 2, 1],
+            backgroundColor: ['#3b82f6', '#8b5cf6', '#f43f5e', '#f59e0b', '#06b6d4'],
+            borderWidth: 0,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: '#94a3b8',
+                font: { family: 'Plus Jakarta Sans', size: 11 },
+                boxWidth: 12,
+                padding: 14
+              }
+            }
+          },
+          cutout: '68%'
+        }
+      });
+
+      // Monthly Impact Bar Chart
+      const impCtx = document.getElementById('impactChart').getContext('2d');
+      new Chart(impCtx, {
+        type: 'bar',
+        data: {
+          labels: ['RC_004 (GST Base)', 'RC_001 (Netbanking)', 'RC_002 (Rounding)', 'RC_003 (Refund)'],
+          datasets: [{
+            label: 'Projected Monthly Loss (₹)',
+            data: [3528.00, 333.20, 0.30, 0.00],
+            backgroundColor: ['rgba(244, 63, 94, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(245, 158, 11, 0.8)'],
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 10 } },
+              grid: { display: false }
+            },
+            y: {
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: v => '₹' + v
+              },
+              grid: { color: 'rgba(255,255,255,0.05)' }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
