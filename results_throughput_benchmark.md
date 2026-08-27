@@ -8,8 +8,8 @@
 
 | Metric | Minimum | Average | Maximum |
 |--------|---------|---------|---------|
-| **Wall-Clock Time** | 383.58 ms | **452.66 ms** | 556.89 ms |
-| **Throughput** | 8,978.5 records/sec | **11,329.6 records/sec** | 13,035.2 records/sec |
+| **Wall-Clock Time** | 384.39 ms | **406.15 ms** | 432.54 ms |
+| **Throughput** | 11,559.5 records/sec | **12,340.0 records/sec** | 13,007.7 records/sec |
 | **Peak Memory Allocation** | 3.29 MB | **3.39 MB** | 3.60 MB |
 
 ---
@@ -18,9 +18,9 @@
 
 | Run # | Processed Records | Exceptions Found | Findings Detected | Execution Time (ms) | Throughput (rec/s) | Peak Memory (MB) |
 |:-----:|:-----------------:|:----------------:|:-----------------:|:-------------------:|:------------------:|:----------------:|
-| Run 1 | 5,000 | 836 | 70 | 556.89 ms | 8,978.5 | 3.60 MB |
-| Run 2 | 5,000 | 836 | 70 | 417.53 ms | 11,975.2 | 3.29 MB |
-| Run 3 | 5,000 | 836 | 70 | 383.58 ms | 13,035.2 | 3.29 MB |
+| Run 1 | 5,000 | 836 | 70 | 432.54 ms | 11,559.5 | 3.60 MB |
+| Run 2 | 5,000 | 836 | 70 | 384.39 ms | 13,007.7 | 3.29 MB |
+| Run 3 | 5,000 | 836 | 70 | 401.51 ms | 12,452.9 | 3.29 MB |
 
 ---
 
