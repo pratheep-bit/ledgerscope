@@ -29,6 +29,11 @@ INTERNATIONAL_RATE_BPS = 300      # 3.00%  - ASSUMED, see RATE BASIS
 RUPAY_UPI_CREDIT_RATE_BPS = 215   # 2.15%  - CONFIRMED, per fetched pricing page
 
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .models import Transaction, FeePlan
+
+
 def round_half_up(numerator: int, denominator: int) -> int:
     """Exact half-up rounding on integers. No float, no banker's rounding.
 
@@ -40,11 +45,13 @@ def round_half_up(numerator: int, denominator: int) -> int:
     engine is built to detect. Getting it wrong here would make the engine
     manufacture the very defect it claims to find.
     """
+    if denominator == 0:
+        raise ZeroDivisionError("denominator cannot be zero in round_half_up")
     return int((Decimal(numerator) / Decimal(denominator)).quantize(
         Decimal("1"), rounding=ROUND_HALF_UP))
 
 
-def applicable_rate_bps(txn, fee_plan) -> int:
+def applicable_rate_bps(txn: "Transaction", fee_plan: "FeePlan") -> int:
     """Resolve the fee rate for one transaction. Deterministic lookup only.
 
     Precedence: RuPay-UPI-credit special case > plan method-specific override >
