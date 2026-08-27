@@ -20,8 +20,8 @@ class Transaction:
     card_network: str | None     # "visa" | "mastercard" | "rupay" | "amex" | None
     is_international: bool
     captured_at: str             # ISO-8601 UTC string
-    is_refund: bool
-    parent_txn_id: str | None    # set only if is_refund is True
+    is_refund: bool = False
+    parent_txn_id: str | None = None    # set only if is_refund is True
     # Extra field not in Step 2 schema — added deliberately to support the
     # RuPay Credit Card on UPI rate override (2.15%) in rates.py.
     # Documented in PROGRESS.md under "Known deviations from spec".
@@ -66,3 +66,13 @@ class MatchResult:
     rule_fired: str | None
     applied_rate_bps: int
     implied_rate_bps: int | None
+
+    @property
+    def is_matched(self) -> bool:
+        """Returns True if the record settled with zero discrepancy."""
+        return self.status == "MATCHED"
+
+    @property
+    def is_exception(self) -> bool:
+        """Returns True if the record has a settlement discrepancy."""
+        return self.status == "EXCEPTION"
