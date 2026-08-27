@@ -4,11 +4,15 @@ engine.py — Core fee/tax recomputation. One function, no I/O, no randomness.
 This is the credibility floor of the entire submission. If an LLM were computing
 these numbers, nothing downstream would be worth reading.
 """
+from typing import TYPE_CHECKING
 from .rates import GST_RATE_BPS, applicable_rate_bps, round_half_up
 from .models import MatchResult
 
+if TYPE_CHECKING:
+    from .models import Transaction, Settlement, FeePlan
 
-def recompute(txn, settlement, fee_plan) -> MatchResult:
+
+def recompute(txn: "Transaction", settlement: "Settlement", fee_plan: "FeePlan") -> MatchResult:
     """The core arithmetic. Called once per transaction. No model, no network,
     no randomness, no clock. Same input -> same output, forever.
 
