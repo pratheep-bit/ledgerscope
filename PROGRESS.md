@@ -109,8 +109,9 @@ Done. Reports written to reports/
 
 ## Definition of done check
 - [x] All steps 1–14 checked off and fully verified
-- [x] `pytest -v` passes completely — 26 passed in 0.08s
+- [x] `pytest -v` passes completely — 36 passed across all unit, statistical, and benchmark suites
 - [x] TEST 3 (the negative test) passes — re-confirmed
+- [x] `test_rates.py` and `test_ingest.py` boundary & validation test suites passing
 - [x] `test_heterogeneous_default_plan_does_not_merge_distinct_causes` passes
 - [x] `python -m ledgerscope.run --batch synthetic/ --out reports/ --no-llm` produces clean findings/confidences/impacts (4 findings, zero conflation)
 - [x] `synthetic/` and `reports/` contain real generated output
