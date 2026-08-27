@@ -7,10 +7,14 @@ reported for any exception that clears none of the prior rules — never suppres
 Check E03 BEFORE E01/E02 — a base error also looks like a wildly wrong rate,
 and would get misfiled as E01 otherwise.
 """
+from typing import TYPE_CHECKING
 from .rates import GST_RATE_BPS, round_half_up
 
+if TYPE_CHECKING:
+    from .models import MatchResult, Transaction, Settlement
 
-def classify(mr, txn, settlement) -> tuple:
+
+def classify(mr: "MatchResult", txn: "Transaction", settlement: "Settlement") -> tuple[str, str]:
     """Returns (exception_code, rule_fired). Order matters: the cascade runs
     most-specific to least, first match wins, and the residual is always
     reported rather than dropped.
@@ -34,9 +38,10 @@ def classify(mr, txn, settlement) -> tuple:
                        f"applied {mr.applied_rate_bps}bps")
 
     if mr.fee_delta_paise == 0 and mr.tax_delta_paise != 0:
-        implied_gst = round_half_up(mr.actual_tax_paise * 10_000,
-                                    mr.actual_fee_paise)
-        if abs(implied_gst - GST_RATE_BPS) > 10:
-            return "E02", f"implied GST {implied_gst}bps != {GST_RATE_BPS}bps"
+        if mr.actual_tax_paise is not None and mr.actual_fee_paise > 0:
+            implied_gst = round_half_up(mr.actual_tax_paise * 10_000,
+                                        mr.actual_fee_paise)
+            if abs(implied_gst - GST_RATE_BPS) > 10:
+                return "E02", f"implied GST {implied_gst}bps != {GST_RATE_BPS}bps"
 
     return "E09", "no classification rule matched"
