@@ -589,7 +589,7 @@ async function runTerminalSimulation(stage) {
       "[2/5] Running engine: 64-bit integer paise recomputation …",
       "[3/5] Classifying exceptions: 44 Matched (71.0%) | 18 Exceptions (29.0%)",
       "[4/5] Root-cause analysis: 4 findings detected (1 Promoted Likely Root Cause)",
-      "[5/5] Token-guard AST check: ALL numeric tokens verified against ground truth.",
+      "[5/5] Numeric token guard: ALL figures verified against ground truth.",
       "",
       "<span style='color:var(--green);font-weight:600;'>Done. Reports written to reports/ (report.json, report.md, audit.jsonl) in 0.140s</span>",
       ""
@@ -645,7 +645,7 @@ async function runTerminalSimulation(stage) {
       "================================================================================",
       "Throughput: <span class='term-pass'>21,332.1 rec/s</span> | Peak Memory: <span class='term-pass'>3.39 MB</span> | Wall-Clock: <span class='term-pass'>234.39 ms</span>",
       "--------------------------------------------------------------------------------",
-      "AST Token Hallucination Guard: <span class='term-pass'>ACTIVE (0 Fabricated Numbers Allowed)</span>",
+      "Numeric Token Verification Guard: <span class='term-pass'>ACTIVE (0 Fabricated Numbers Allowed)</span>",
       ""
     ]);
   }
@@ -700,27 +700,27 @@ function sleep(ms) {
 const STEPS = [
   // ─── MINUTE 1 (0:00 – 1:00): THE HOOK ───
   {
-    text: "Imagine you're a Razorpay merchant doing 10 crores a month. Every day, Razorpay sends you a settlement file — thousands of rows, each with fees deducted, GST charged, net amount credited.",
+    text: "Every batch, a merchant's settlement file has silent errors in it — a fee plan says 1.90%, but the gateway charges 2.00%; GST gets computed on the wrong base; refund fees never get credited back.",
     act: () => { switchView('viewDashboard', 'Ledgerscope', 'STL_2026_08 · 62 records', 'INTEGER PAISE · LIVE'); closeDrawer(); clearHL(); scrollToTop(); }
   },
   {
-    text: "Here's the problem nobody talks about: your settlement file has errors in it. Silent errors.",
+    text: "In our test batch, that added up to ₹386 misrouted across just 62 transactions — scale that to a month, and it's ₹3,861 in silent revenue loss.",
     act: () => scrollToTop()
   },
   {
-    text: "The fee plan says 1.90%, but the gateway charged you 2.00%. GST was computed on your full order amount instead of just the platform fee. Refund fees were never credited back.",
+    text: "These are not rare edge cases. They happen in every settlement file, every single day.",
     act: () => scrollToTop()
   },
   {
-    text: "These are not rare bugs. They happen every single batch. And across a year, a mid-size merchant bleeds 5 to 10 lakhs without ever knowing.",
+    text: "And today's finance teams have two bad options: either stare at thousands of mismatched Excel rows and guess why, or trust an AI chatbot that literally invents numbers.",
     act: () => scrollToTop()
   },
   {
-    text: "Today's tools give you two bad options: either stare at 2,000 mismatched Excel rows and figure it out yourself, or trust an AI chatbot that literally invents numbers.",
+    text: "We built a third option: a deterministic, root-cause reconciliation engine that proves every number down to the paise.",
     act: () => scrollToTop()
   },
   {
-    text: "We built a third option. We built Ledgerscope.",
+    text: "We built Ledgerscope.",
     act: () => scrollToTop()
   },
 

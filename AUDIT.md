@@ -78,7 +78,7 @@ ls -la tests/test_rates.py
 | `tests/test_engine.py` | 194 | Unit tests for fee/tax recomputation, including TEST 1 anchor transaction (₹1,337.49 @ 200 bps), 4-row boundary table, international surcharge, and custom override rates. |
 | `tests/test_classify.py` | 187 | Unit tests verifying deterministic classification cascade for exception codes E01, E03, E04, E05, E06, and E09. |
 | `tests/test_rootcause.py` | 364 | Unit tests protecting root cause invariants: TEST 2 (systemic cluster promotion), TEST 3 (weak pattern rejection), TEST 4 (outlier isolation), and TEST 5 (no duplicate member sets). |
-| `tests/test_narrate.py` | 144 | Unit tests for template-based narration and token-level AST hallucination guard fallback when an LLM synthesizes fabricated figures. |
+| `tests/test_narrate.py` | 144 | Unit tests for template-based narration and numeric-token hallucination guard fallback when an LLM synthesizes fabricated figures. |
 | `tests/test_ingest.py` | 53 | Unit tests for CSV ingestion, strict boolean parsing (`true`/`false`/`1`/`0`), required field validation, and inner join with orphan tracking. |
 | `tests/test_statistical_validation.py` | 17 | Test runner wrapper exposing 100-batch false positive validation and 100-batch recall validation to pytest. |
 | `test_statistical_validation.py` | 271 | Full statistical validation engine generating 100 uncorrelated noise batches (FPR test) and 100 injected ground-truth batches (Recall test). |
@@ -458,4 +458,4 @@ The following figures are **100% verified against real execution runs** and can 
 8. **Automated Test Suite**: **39/39 passing tests** in **~2.0 seconds** (`pytest -v`).
 9. **Statistical Validation**: **0.0% False Positive Rate** (0/100 noise batches) and **100.0% Recall** (100/100 injected ground-truth batches).
 10. **Throughput Benchmark**: **20,800+ records/second** (median **21,332 rec/s** / 234 ms on 5,000 paired records) with **3.39 MB peak memory** on a single CPU core.
-11. **Hallucination Guard**: AST numeric token membership validator with **100% template fallback** if any synthesized number deviates from computed ground truth.
+11. **Hallucination Guard**: Numeric-token membership validator with **100% template fallback** if any synthesized number deviates from computed ground truth.
