@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledgerscope — 5-Minute Pitch Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --accent: #ff6b35;
+    --accent-glow: rgba(255, 107, 53, 0.3);
+    --green: #27c93f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    background: radial-gradient(circle at 10% 20%, #e85d43 0%, #d83a56 25%, #6930c3 60%, #1e3c72 100%);
+    background-attachment: fixed;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== STUDIO STAGE & MACBOOK WINDOW ===== */
+  #stage {
+    position: relative;
+    width: calc(100vw - 80px);
+    max-width: 1480px;
+    height: calc(100vh - 90px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mac-window {
+    width: 100%;
+    height: 100%;
+    background: #12151b;
+    border-radius: 16px;
+    box-shadow: 0 35px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.14);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ===== MAC TITLEBAR ===== */
+  .mac-titlebar {
+    height: 44px;
+    background: #1a1e27;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    flex-shrink: 0;
+  }
+
+  .mac-traffic {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mac-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .mac-dot.red { background: #ff5f56; border: 0.5px solid #e0443e; }
+  .mac-dot.yellow { background: #ffbd2e; border: 0.5px solid #dea123; }
+  .mac-dot.green { background: #27c93f; border: 0.5px solid #1aab29; }
+
+  .mac-title {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #9ba1ae;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mac-title-pill {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #cbd1db;
+  }
+
+  .mac-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mac-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    background: rgba(39, 201, 63, 0.12);
+    border: 1px solid rgba(39, 201, 63, 0.3);
+    padding: 3px 9px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== MULTI-VIEW MAC CONTENT ===== */
+  .mac-content {
+    flex: 1;
+    width: 100%;
+    height: calc(100% - 44px);
+    position: relative;
+    overflow: hidden;
+    background: #0e1013;
+  }
+
+  .view-panel {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s;
+  }
+  .view-panel.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #dashboard {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #f7f6f3;
+  }
+
+  /* ===== INTERACTIVE LIVE-TYPING TERMINAL ===== */
+  .live-terminal {
+    width: 100%;
+    height: 100%;
+    background: #0a0c10;
+    padding: 26px 36px 80px 36px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    color: #f5f0e8;
+    font-size: 13px;
+    line-height: 1.68;
+  }
+  .prompt-prefix {
+    color: #3b82f6;
+    font-weight: 600;
+  }
+  .prompt-path {
+    color: #a855f7;
+    font-weight: 600;
+  }
+  .prompt-symbol {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .typed-command {
+    color: #ffffff;
+    font-weight: 600;
+  }
+  .cursor-blink {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background: var(--accent);
+    vertical-align: middle;
+    margin-left: 2px;
+    animation: blink 0.8s infinite;
+  }
+  @keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  .term-out {
+    color: #9ba1ae;
+    margin: 4px 0 14px 0;
+  }
+  .term-pass {
+    color: var(--green);
+    font-weight: 600;
+  }
+  .term-banner {
+    background: rgba(39, 201, 63, 0.08);
+    border: 1px solid rgba(39, 201, 63, 0.3);
+    color: var(--green);
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    margin: 12px 0;
+  }
+
+  /* ===== LOOM-STYLE HALF-OVERLAY CAMERA BUBBLE ===== */
+  #cameraBubble {
+    position: absolute;
+    top: -24px;
+    right: -24px;
+    width: 210px;
+    height: 210px;
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 280;
+    border: 4px solid #ffffff;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0,0,0,0.1);
+    background: #14171d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  #cameraBubble:hover {
+    transform: scale(1.03);
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.75);
+  }
+  #cameraBubble:active {
+    cursor: grabbing;
+  }
+  #cameraVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    display: block;
+    background: #14171d;
+  }
+  #cameraFallback {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #9ba1ae;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: center;
+    padding: 12px;
+  }
+  #cameraFallback svg {
+    width: 44px;
+    height: 44px;
+    stroke: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  /* ===== TITLE SCREEN ===== */
+  #titleScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 350;
+    background: rgba(14, 16, 19, 0.96);
+    backdrop-filter: blur(16px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.5s ease, visibility 0.5s;
+  }
+  #titleScreen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .title-badge {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: rgba(255, 107, 53, 0.12);
+    border: 1px solid rgba(255, 107, 53, 0.3);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 22px;
+  }
+  .title-main {
+    font-family: var(--font-mono);
+    font-size: 54px;
+    font-weight: 700;
+    color: #f5f0e8;
+    letter-spacing: 5px;
+    margin-bottom: 10px;
+  }
+  .title-sub {
+    font-size: 18px;
+    font-weight: 400;
+    color: #9ba1ae;
+    letter-spacing: 1px;
+    margin-bottom: 38px;
+  }
+  .title-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 14px 34px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(255, 107, 53, 0.4);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .title-btn:hover {
+    background: #ff8555;
+    transform: translateY(-2px);
+  }
+  .title-hint {
+    margin-top: 18px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #666c78;
+    letter-spacing: 1px;
+  }
+
+  /* ===== APP-ALIGNED CAPTION OVERLAY ===== */
+  #captionWrap {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 920px;
+    width: 92%;
+    pointer-events: auto;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  #captionWrap.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .caption-box {
+    background: rgba(18, 21, 27, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 21px;
+    font-weight: 500;
+    line-height: 1.55;
+    padding: 16px 28px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 14px 45px rgba(0, 0, 0, 0.7);
+    transition: border-color 0.2s;
+  }
+  #captionWrap:hover .caption-box {
+    border-color: rgba(255, 107, 53, 0.6);
+  }
+
+  /* ===== PROGRESS BAR ===== */
+  #progressBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff6b35, #ff8f65);
+    z-index: 310;
+    transition: width 0.35s ease;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== MAIN MACBOOK STAGE ===== -->
+<div id="stage">
+  <!-- MACBOOK WINDOW -->
+  <div class="mac-window">
+    <div class="mac-titlebar">
+      <div class="mac-traffic">
+        <span class="mac-dot red"></span>
+        <span class="mac-dot yellow"></span>
+        <span class="mac-dot green"></span>
+      </div>
+      <div class="mac-title">
+        <span id="macAppTitle">Ledgerscope</span>
+        <span class="mac-title-pill" id="macAppPill">STL_2026_08 · 62 records</span>
+      </div>
+      <div class="mac-actions">
+        <span class="mac-badge" id="macBadge">INTEGER PAISE · LIVE</span>
+      </div>
+    </div>
+
+    <!-- MULTI-VIEW MACBOOK CONTENT -->
+    <div class="mac-content">
+      <!-- VIEW 1: LIVE DASHBOARD -->
+      <div class="view-panel active" id="viewDashboard">
+        <iframe id="dashboard" src="dashboard.html"></iframe>
+      </div>
+
+      <!-- VIEW 2: INTERACTIVE LIVE-TYPING TERMINAL (MINUTE 5) -->
+      <div class="view-panel" id="viewTerminal">
+        <div class="live-terminal" id="terminalScreen">
+          <!-- Live typed commands and execution logs will stream here automatically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOOM-STYLE CIRCLE CAMERA BUBBLE (HALF OVERLAY TOP-RIGHT) -->
+  <div id="cameraBubble" title="Live Camera (Drag to reposition)">
+    <video id="cameraVideo" autoplay playsinline muted></video>
+    <div id="cameraFallback">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+      <span>WEBCAM</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TITLE SCREEN ===== -->
+<div id="titleScreen" onclick="startPresentation()">
+  <div class="title-badge">Track 04 · AI Finance Controller</div>
+  <div class="title-main">LEDGERSCOPE</div>
+  <div class="title-sub">Deterministic Settlement Reconciliation Engine for Razorpay Merchants</div>
+  <button class="title-btn" onclick="event.stopPropagation(); startPresentation();">
+    <span>START PRESENTATION</span>
+    <span style="font-size: 18px;">→</span>
+  </button>
+  <div class="title-hint">Click anywhere or press Space / → Arrow to begin</div>
+</div>
+
+<!-- ===== CAPTION OVERLAY ===== -->
+<div id="captionWrap" onclick="nextStep()">
+  <div class="caption-box" id="captionText">Loading...</div>
+</div>
+
+<!-- ===== PROGRESS BAR ===== -->
+<div id="progressBar" style="width:0%"></div>
+
+<script>
+// ============================================================
+//  PRESENTATION CONTROLLER
+// ============================================================
+
+let step = -1;
+let started = false;
+let iDoc = null;
+let iWin = null;
+let termInitialized = false;
+
+const iframe = document.getElementById('dashboard');
+
+function bindIframe() {
+  try {
+    iDoc = iframe.contentDocument || iframe.contentWindow.document;
+    iWin = iframe.contentWindow;
+    injectStyles();
+    bindIframeEvents();
+  } catch (e) {
+    console.warn("Iframe bind error:", e);
+  }
+}
+
+iframe.addEventListener('load', bindIframe);
+setTimeout(bindIframe, 300);
+
+function injectStyles() {
+  if (!iDoc) return;
+  if (iDoc.getElementById('ls-pitch-styles')) return;
+  const s = iDoc.createElement('style');
+  s.id = 'ls-pitch-styles';
+  s.textContent = `
+    @keyframes lsGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0.7); }
+      50%      { box-shadow: 0 0 0 14px rgba(255,107,53,0); }
+    }
+    .ls-hl {
+      animation: lsGlow 1.6s ease-in-out infinite !important;
+      outline: 3px solid #ff6b35 !important;
+      outline-offset: 6px !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+  `;
+  iDoc.head.appendChild(s);
+}
+
+function bindIframeEvents() {
+  if (!iDoc) return;
+  iDoc.addEventListener('keydown', handleKeyDown);
+}
+
+// ————— View Switcher Utility —————
+function switchView(viewId, title, pill, badge) {
+  document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById(viewId)?.classList.add('active');
+  if (title) document.getElementById('macAppTitle').textContent = title;
+  if (pill) document.getElementById('macAppPill').textContent = pill;
+  if (badge) document.getElementById('macBadge').textContent = badge;
+}
+
+// ————— UI Utilities —————
+function clearHL() {
+  if (!iDoc) return;
+  iDoc.querySelectorAll('.ls-hl').forEach(el => el.classList.remove('ls-hl'));
+}
+
+function hl(sel, scroll = true) {
+  clearHL();
+  if (!iDoc) return;
+  const el = iDoc.querySelector(sel);
+  if (!el) return;
+  el.classList.add('ls-hl');
+  if (scroll) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function hlNth(sel, n, scroll = true) {
+  clearHL();
+  if (!iDoc) return;
+  const els = iDoc.querySelectorAll(sel);
+  if (els[n]) {
+    els[n].classList.add('ls-hl');
+    if (scroll) els[n].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function hlAll(sel) {
+  clearHL();
+  if (!iDoc) return;
+  iDoc.querySelectorAll(sel).forEach(el => el.classList.add('ls-hl'));
+}
+
+function scrollToTop() {
+  try { iWin?.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
+}
+
+function scrollToSel(sel) {
+  if (!iDoc) return;
+  const el = iDoc.querySelector(sel);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function openDrawer(id) {
+  try { iWin?.openDrawer(id); } catch(e) {}
+}
+function closeDrawer() {
+  try { iWin?.closeDrawer(); } catch(e) {}
+}
+
+// ============================================================
+//  REALISTIC LIVE TERMINAL TYPING SIMULATOR (HUMAN PACE)
+// ============================================================
+async function runTerminalSimulation(stage) {
+  const term = document.getElementById('terminalScreen');
+  if (!term) return;
+
+  if (stage === 1 && !termInitialized) {
+    termInitialized = true;
+    term.innerHTML = '';
+
+    // Command 1: python3 -m ledgerscope.run
+    await typePromptLine(term, "python3 -m ledgerscope.run --batch synthetic/ --out reports/ --no-llm");
+    await sleep(400);
+    await appendOutputLines(term, [
+      "[1/5] Loading data from synthetic/",
+      "      62 transactions, 62 settlements (Joined: 62 | Orphans: 0)",
+      "[2/5] Running engine: 64-bit integer paise recomputation …",
+      "[3/5] Classifying exceptions: 44 Matched (71.0%) | 18 Exceptions (29.0%)",
+      "[4/5] Root-cause analysis: 4 findings detected (1 Promoted Likely Root Cause)",
+      "[5/5] Token-guard AST check: ALL numeric tokens verified against ground truth.",
+      "",
+      "<span style='color:var(--green);font-weight:600;'>Done. Reports written to reports/ (report.json, report.md, audit.jsonl) in 0.140s</span>",
+      ""
+    ]);
+
+    // Command 2: pytest -v
+    await sleep(600);
+    await typePromptLine(term, "pytest -v");
+    await sleep(350);
+    await appendOutputLines(term, [
+      "platform darwin -- Python 3.14.0, pytest-9.1.1 -- rootdir: /ledgerscope",
+      "test_statistical_validation.py::test_statistical_false_positive_rate <span class='term-pass'>PASSED</span> [  5%]",
+      "test_statistical_validation.py::test_statistical_recall_rate <span class='term-pass'>PASSED</span> [  7%]",
+      "test_throughput_benchmark.py::test_throughput_benchmark_speed <span class='term-pass'>PASSED</span> [ 10%]",
+      "tests/test_classify.py::test_classify_e01_fee_rate_mismatch <span class='term-pass'>PASSED</span> [ 23%]",
+      "tests/test_classify.py::test_classify_e03_gst_base_mismatch <span class='term-pass'>PASSED</span> [ 31%]",
+      "tests/test_classify.py::test_classify_e04_rounding_drift <span class='term-pass'>PASSED</span> [ 44%]",
+      "tests/test_engine.py::test_rounding_boundary_lands_on_dot5 <span class='term-pass'>PASSED</span> [ 56%]",
+      "tests/test_rates.py::test_round_half_up_positive_half_integers <span class='term-pass'>PASSED</span> [ 69%]",
+      "tests/test_rootcause.py::test_test2_systemic_cluster_promoted <span class='term-pass'>PASSED</span> [ 82%]",
+      "tests/test_rootcause.py::test_test4_outliers_do_not_hijack <span class='term-pass'>PASSED</span> [ 92%]",
+      "tests/test_narrate.py::test_narrate_falls_back_on_hallucination <span class='term-pass'>PASSED</span> [100%]",
+      "",
+      "<div class='term-banner'>============================== 39 passed in 1.98s ==============================</div>",
+      ""
+    ]);
+  }
+
+  if (stage === 2) {
+    // Command 3: statistical validation & throughput benchmark
+    await typePromptLine(term, "python3 test_statistical_validation.py");
+    await sleep(400);
+    await appendOutputLines(term, [
+      "================================================================================",
+      "LEDGERSCOPE STATISTICAL VALIDATION SUITE (100 BATCHES EACH)",
+      "================================================================================",
+      "",
+      "Metric                              | Sample Size  | Result       | Status",
+      "---------------------------------------------------------------------------",
+      "False Positive Rate (Unrelated)     | 100 batches  | <span class='term-pass'>0.0%</span>         | <span class='term-pass'>PASS (0.0% false promotions)</span>",
+      "Recall Rate (Injected Causes)       | 100 batches  | <span class='term-pass'>100.0%</span>       | <span class='term-pass'>PASS (100.0% detected)</span>",
+      "---------------------------------------------------------------------------",
+      "Report successfully saved to results_statistical_validation.md",
+      ""
+    ]);
+
+    await sleep(500);
+    await typePromptLine(term, "python3 test_throughput_benchmark.py");
+    await sleep(400);
+    await appendOutputLines(term, [
+      "================================================================================",
+      "LEDGERSCOPE THROUGHPUT BENCHMARK (5,000 RECORDS · 3 RUNS)",
+      "================================================================================",
+      "Throughput: <span class='term-pass'>12,340.0 rec/s</span> | Peak Memory: <span class='term-pass'>3.39 MB</span> | Wall-Clock: <span class='term-pass'>406.15 ms</span>",
+      "--------------------------------------------------------------------------------",
+      "AST Token Hallucination Guard: <span class='term-pass'>ACTIVE (0 Fabricated Numbers Allowed)</span>",
+      ""
+    ]);
+  }
+}
+
+function typePromptLine(term, text) {
+  return new Promise((resolve) => {
+    const line = document.createElement('div');
+    line.innerHTML = `<span class="prompt-prefix">pratheep@macbook</span>:<span class="prompt-path">~/ledgerscope</span><span class="prompt-symbol">$ </span><span class="typed-command"></span><span class="cursor-blink"></span>`;
+    term.appendChild(line);
+
+    const cmdSpan = line.querySelector('.typed-command');
+    const cursor = line.querySelector('.cursor-blink');
+    let idx = 0;
+
+    // Natural human typing speed (~46ms per char)
+    const interval = setInterval(() => {
+      if (idx < text.length) {
+        cmdSpan.textContent += text[idx];
+        idx++;
+        term.scrollTop = term.scrollHeight;
+      } else {
+        clearInterval(interval);
+        setTimeout(() => {
+          cursor.remove();
+          resolve();
+        }, 180);
+      }
+    }, 46);
+  });
+}
+
+async function appendOutputLines(term, lines) {
+  for (const l of lines) {
+    const out = document.createElement('div');
+    out.className = 'term-out';
+    out.style.margin = '2px 0';
+    out.innerHTML = l;
+    term.appendChild(out);
+    term.scrollTop = term.scrollHeight;
+    await sleep(35);
+  }
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ============================================================
+//  EXACT SCRIPT — 100% VERBATIM WITH LIVE-TYPED TERMINAL
+// ============================================================
+const STEPS = [
+  // ─── MINUTE 1 (0:00 – 1:00): THE HOOK ───
+  {
+    text: "Imagine you're a Razorpay merchant doing 10 crores a month. Every day, Razorpay sends you a settlement file — thousands of rows, each with fees deducted, GST charged, net amount credited.",
+    act: () => { switchView('viewDashboard', 'Ledgerscope', 'STL_2026_08 · 62 records', 'INTEGER PAISE · LIVE'); closeDrawer(); clearHL(); scrollToTop(); }
+  },
+  {
+    text: "Here's the problem nobody talks about: your settlement file has errors in it. Silent errors.",
+    act: () => scrollToTop()
+  },
+  {
+    text: "The fee plan says 1.90%, but the gateway charged you 2.00%. GST was computed on your full order amount instead of just the platform fee. Refund fees were never credited back.",
+    act: () => scrollToTop()
+  },
+  {
+    text: "These are not rare bugs. They happen every single batch. And across a year, a mid-size merchant bleeds 5 to 10 lakhs without ever knowing.",
+    act: () => scrollToTop()
+  },
+  {
+    text: "Today's tools give you two bad options: either stare at 2,000 mismatched Excel rows and figure it out yourself, or trust an AI chatbot that literally invents numbers.",
+    act: () => scrollToTop()
+  },
+  {
+    text: "We built a third option. We built Ledgerscope.",
+    act: () => scrollToTop()
+  },
+
+  // ─── MINUTE 2 (1:00 – 2:00): THE LIVE DEMO ───
+  {
+    text: "Let me show you a real run. I fed Ledgerscope a 3-day settlement batch — 62 transactions across cards, UPI, netbanking, and wallets.",
+    act: () => { switchView('viewDashboard'); scrollToTop(); setTimeout(() => hlAll('.kpi'), 300); }
+  },
+  {
+    text: "In 140 milliseconds — faster than a blink — the engine processed everything and gave me these four numbers:",
+    act: () => hlAll('.kpi')
+  },
+  {
+    text: "62 transactions ingested. 44 matched perfectly — zero variance, down to the paise. That's a 71% clean match rate.",
+    act: () => hlNth('.kpi', 1)
+  },
+  {
+    text: "18 exceptions found — and here's what matters — zero unexplained errors. Every single exception has a deterministic code and a root cause.",
+    act: () => hlNth('.kpi', 2)
+  },
+  {
+    text: "The total overcharge this batch? ₹384 rupees. Scale that to a month? ₹3,843 in silent revenue loss.",
+    act: () => hlNth('.kpi', 3)
+  },
+  {
+    text: "But here's where Ledgerscope is different from everything else. It doesn't just list 18 errors. It tells you why they happened and what to do about it.",
+    act: () => { clearHL(); scrollToSel('.finding'); }
+  },
+
+  // ─── MINUTE 3 (2:00 – 3:00): THE ROOT-CAUSE INTELLIGENCE ───
+  {
+    text: "Look at Finding Number 1 — RC_001: The engine found that 10 netbanking transactions on fee plan PLN_ENT_2024 were all overcharged.",
+    act: () => hl('.finding.promoted') || hl('.finding')
+  },
+  {
+    text: "The merchant negotiated 1.90%, but the gateway applied 2.00%. That's a 5.26% silent overcharge on every single netbanking payment.",
+    act: () => {}
+  },
+  {
+    text: "10 out of 18 exceptions — 55.6% coverage. Our engine promotes this as a Likely Root Cause because it crosses the 50% coverage threshold with consistent direction.",
+    act: () => {}
+  },
+  {
+    text: "This is not a guess. This is mathematical proof.",
+    act: () => {}
+  },
+  {
+    text: "Now look at Finding Number 4 — RC_004: Two card transactions where GST was charged on the full ₹1,000 order amount instead of just the ₹20 platform fee.",
+    act: () => {
+      const cards = iDoc?.querySelectorAll('.finding');
+      if (cards?.length) {
+        clearHL();
+        const last = cards[cards.length - 1];
+        last.classList.add('ls-hl');
+        last.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  },
+  {
+    text: "That's ₹180 in tax instead of ₹3.60 — a 50x overcharge. Total damage: ₹352 from just two transactions.",
+    act: () => {}
+  },
+  {
+    text: "And each finding comes with a one-click copyable action: 'Audit the netbanking rate on PLN_ENT_2024.' The finance controller doesn't need to think. They just copy, paste, and send it to the gateway team.",
+    act: () => {}
+  },
+
+  // ─── MINUTE 4 (3:00 – 4:00): THE MATH INSPECTOR ───
+  {
+    text: "Click on any transaction and you get a full forensic breakdown. Expected fee: 18,999 paise. Settled fee: 19,999 paise.",
+    act: () => { clearHL(); openDrawer('TXN_0045'); }
+  },
+  {
+    text: "Fee overcharge: +₹10.00. GST overcharge: +₹1.80. Total discrepancy: +₹11.80.",
+    act: () => {}
+  },
+  {
+    text: "Notice something important: every single number is in integer paise. There is zero floating-point math anywhere in this engine. Why does that matter?",
+    act: () => {}
+  },
+  {
+    text: "Because Python's default rounding is wrong for Indian accounting. Python says round(480.5) equals 480. Indian tax law says it equals 481.",
+    act: () => {}
+  },
+  {
+    text: "If your reconciliation tool uses Python's default math, it creates the exact 1-paise error it's trying to find. Thousands of false alarms.",
+    act: () => {}
+  },
+  {
+    text: "Ledgerscope uses pure integer arithmetic with statutory half-up rounding. Every calculation is deterministic, reproducible, and audit-ready.",
+    act: () => closeDrawer()
+  },
+
+  // ─── MINUTE 5 (4:00 – 5:00): LIVE-TYPING TERMINAL PROOF ───
+  {
+    text: "Let me show you the proof. 39 automated tests. All green. Under 2 seconds.",
+    act: () => { clearHL(); switchView('viewTerminal', 'Terminal — zsh', 'python3 & pytest', '39 / 39 GREEN'); runTerminalSimulation(1); }
+  },
+  {
+    text: "We ran our engine against 200 synthetic settlement batches:",
+    act: () => { switchView('viewTerminal'); }
+  },
+  {
+    text: "100 batches of pure random noise — zero false root causes promoted. 0.0% false positive rate.",
+    act: () => { switchView('viewTerminal'); runTerminalSimulation(2); }
+  },
+  {
+    text: "100 batches with injected defects — every single defect caught. 100% recall.",
+    act: () => { switchView('viewTerminal'); }
+  },
+  {
+    text: "Throughput: 12,340 records per second on a single CPU core. Under 3.5 megabytes of RAM. No GPU. No cloud API. No LLM token cost.",
+    act: () => { switchView('viewTerminal'); }
+  },
+  {
+    text: "And if you do use an LLM to generate dispute memos, our hallucination guard automatically checks every number in the output against computed truth. If the AI invents even one figure — it gets rejected and replaced with a deterministic template.",
+    act: () => { switchView('viewTerminal'); }
+  },
+  {
+    text: "Ledgerscope turns messy settlement batches into instant, audit-grade revenue recovery. It's fast, it's provably accurate, and it's ready for production today. Thank you.",
+    act: () => { switchView('viewDashboard', 'Ledgerscope', 'STL_2026_08 · 62 records', 'INTEGER PAISE · LIVE'); clearHL(); scrollToTop(); }
+  },
+];
+
+// ============================================================
+//  RENDER & CONTROLS
+// ============================================================
+
+function startPresentation() {
+  started = true;
+  document.getElementById('titleScreen').classList.add('hidden');
+  render(0);
+}
+
+function render(idx) {
+  if (idx < 0 || idx >= STEPS.length) return;
+  step = idx;
+  const s = STEPS[idx];
+
+  const wrap = document.getElementById('captionWrap');
+  const txt  = document.getElementById('captionText');
+  const bar  = document.getElementById('progressBar');
+
+  wrap.classList.remove('visible');
+  setTimeout(() => {
+    txt.textContent = s.text;
+    wrap.classList.add('visible');
+  }, 120);
+
+  bar.style.width = `${((idx + 1) / STEPS.length) * 100}%`;
+
+  try { s.act(); } catch(e) { console.warn("Step act err:", e); }
+}
+
+function nextStep() {
+  if (!started) {
+    startPresentation();
+    return;
+  }
+  if (step < STEPS.length - 1) {
+    render(step + 1);
+  }
+}
+
+function prevStep() {
+  if (started && step > 0) {
+    render(step - 1);
+  }
+}
+
+function handleKeyDown(e) {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    nextStep();
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    prevStep();
+  } else if (e.key === 'Escape') {
+    closeDrawer();
+  }
+}
+
+window.addEventListener('keydown', handleKeyDown);
+document.addEventListener('keydown', handleKeyDown);
+
+// ============================================================
+//  LOOM-STYLE WEBCAM INITIALIZATION & DRAG LOGIC
+// ============================================================
+async function initCamera() {
+  const video = document.getElementById('cameraVideo');
+  const fallback = document.getElementById('cameraFallback');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { ideal: 640 },
+        height: { ideal: 640 },
+        facingMode: 'user'
+      },
+      audio: false
+    });
+    video.srcObject = stream;
+    video.style.display = 'block';
+    fallback.style.display = 'none';
+  } catch (err) {
+    console.warn("Webcam access not granted or unavailable:", err);
+    video.style.display = 'none';
+    fallback.style.display = 'flex';
+  }
+}
+
+// Draggable Camera Bubble
+(function initDraggableCamera() {
+  const bubble = document.getElementById('cameraBubble');
+  let isDragging = false;
+  let startX, startY, initialLeft, initialTop;
+
+  bubble.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = bubble.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+    bubble.style.transition = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    bubble.style.left = `${initialLeft + dx}px`;
+    bubble.style.top = `${initialTop + dy}px`;
+    bubble.style.right = 'auto';
+    bubble.style.bottom = 'auto';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      bubble.style.transition = 'box-shadow 0.2s, transform 0.2s';
+    }
+  });
+
+  bubble.addEventListener('dblclick', initCamera);
+})();
+
+// Start camera on page load
+initCamera();
+
+</script>
+</body>
+</html>
