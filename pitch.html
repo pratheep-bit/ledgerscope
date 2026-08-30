@@ -613,7 +613,7 @@ async function runTerminalSimulation(stage) {
       "tests/test_rootcause.py::test_test4_outliers_do_not_hijack <span class='term-pass'>PASSED</span> [ 92%]",
       "tests/test_narrate.py::test_narrate_falls_back_on_hallucination <span class='term-pass'>PASSED</span> [100%]",
       "",
-      "<div class='term-banner'>============================== 39 passed in 1.98s ==============================</div>",
+      "<div class='term-banner'>============================== 39 passed in 2.01s ==============================</div>",
       ""
     ]);
   }
@@ -643,7 +643,7 @@ async function runTerminalSimulation(stage) {
       "================================================================================",
       "LEDGERSCOPE THROUGHPUT BENCHMARK (5,000 RECORDS · 3 RUNS)",
       "================================================================================",
-      "Throughput: <span class='term-pass'>12,340.0 rec/s</span> | Peak Memory: <span class='term-pass'>3.39 MB</span> | Wall-Clock: <span class='term-pass'>406.15 ms</span>",
+      "Throughput: <span class='term-pass'>21,332.1 rec/s</span> | Peak Memory: <span class='term-pass'>3.39 MB</span> | Wall-Clock: <span class='term-pass'>234.39 ms</span>",
       "--------------------------------------------------------------------------------",
       "AST Token Hallucination Guard: <span class='term-pass'>ACTIVE (0 Fabricated Numbers Allowed)</span>",
       ""
@@ -742,7 +742,7 @@ const STEPS = [
     act: () => hlNth('.kpi', 2)
   },
   {
-    text: "The total overcharge this batch? ₹384 rupees. Scale that to a month? ₹3,843 in silent revenue loss.",
+    text: "The total batch discrepancy across all findings? ₹386 rupees. Scale that to a month? ₹3,861 in silent revenue loss.",
     act: () => hlNth('.kpi', 3)
   },
   {
@@ -780,7 +780,7 @@ const STEPS = [
     }
   },
   {
-    text: "That's ₹180 in tax instead of ₹3.60 — a 50x overcharge. Total damage: ₹352 from just two transactions.",
+    text: "That's ₹180 in tax instead of ₹3.60 — a 50x overcharge. Total damage: ₹352.80 from just two transactions.",
     act: () => {}
   },
   {
@@ -832,7 +832,7 @@ const STEPS = [
     act: () => { switchView('viewTerminal'); }
   },
   {
-    text: "Throughput: 12,340 records per second on a single CPU core. Under 3.5 megabytes of RAM. No GPU. No cloud API. No LLM token cost.",
+    text: "Throughput: Over 20,800 records per second — 21,332 rec/s measured median on 5,000 transactions. Under 3.4 megabytes of RAM. No GPU. No cloud API. No LLM token cost.",
     act: () => { switchView('viewTerminal'); }
   },
   {
