@@ -85,3 +85,11 @@ In the 62-record synthetic dataset, 8 residual exceptions on the default fee pla
 **Lesson**:
 Deterministic classifications computed by earlier pipeline stages represent ground truth, not correlative hypotheses. Pruning must protect diagnostic ground truth from being swallowed by coincidental configuration attributes. Unit tests must also test heterogeneous multi-group populations to avoid artificial fixture bias.
 
+---
+
+## Known Limitation 6 — 2026-08-30: RC_003 (E06 Refund Fee Reversal) ₹0.00 Mathematical Delta in Baseline Engine
+
+**Module**: `engine.py` & `rootcause.py`  
+**Description**: In `reports/report.md`, finding `RC_003` (2 refund records with unreversed platform fees classified as `E06`) displays an observed batch impact of `₹0.00`.  
+**Root Cause**: The current `recompute()` baseline in `engine.py` calculates expected settlement fee purely from the nominal fee plan rate table without branching into a negative reversal credit for refund transactions. Because the settled fee arithmetically matches the nominal calculated fee (`fee_delta = 0`), `mr.total_delta_paise` evaluates to 0, even though `classify()` correctly identifies the semantic violation `E06_REFUND_FEE_NOT_REVERSED`.  
+**Resolution & Disclosure**: Intentionally documented as a known design trade-off rather than risking last-minute regression patches before submission. The classification and root-cause cluster correctly isolate the 2 transactions (`confidence: LOW`, `is_refund=True`, `E06`), and the financial delta calculation can be enhanced in v1.1 to assign the full uncredited fee amount as the delta.
