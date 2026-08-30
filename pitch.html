@@ -661,20 +661,54 @@ function typePromptLine(term, text) {
     const cursor = line.querySelector('.cursor-blink');
     let idx = 0;
 
-    // Natural human typing speed (~46ms per char)
-    const interval = setInterval(() => {
+    function getDelay(char, prevChar, nextChar) {
+      // Space: humans pause between words/flags to formulate next token (160ms - 260ms)
+      if (char === ' ') {
+        return Math.floor(180 + Math.random() * 80);
+      }
+      // First character after a space: slight starting delay
+      if (prevChar === ' ') {
+        return Math.floor(80 + Math.random() * 50);
+      }
+      // Punctuation, dashes, slashes, underscores: tactile reach delay (85ms - 145ms)
+      if (char === '-' || char === '/' || char === '.' || char === '_') {
+        return Math.floor(90 + Math.random() * 55);
+      }
+      // Numbers (e.g. '3' in python3)
+      if (/\d/.test(char)) {
+        return Math.floor(70 + Math.random() * 45);
+      }
+      // Random organic micro-hesitation (~9% chance of thinking pause)
+      if (Math.random() < 0.09) {
+        return Math.floor(100 + Math.random() * 60);
+      }
+      // Fast letter burst cadence (3-letter flow chunks: 26ms - 52ms)
+      return Math.floor(28 + Math.random() * 26);
+    }
+
+    function typeNextChar() {
       if (idx < text.length) {
-        cmdSpan.textContent += text[idx];
+        const char = text[idx];
+        const prevChar = idx > 0 ? text[idx - 1] : '';
+        const nextChar = idx < text.length - 1 ? text[idx + 1] : '';
+
+        cmdSpan.textContent += char;
         idx++;
         term.scrollTop = term.scrollHeight;
+
+        const delay = getDelay(char, prevChar, nextChar);
+        setTimeout(typeNextChar, delay);
       } else {
-        clearInterval(interval);
+        // Natural pause before pressing Enter (260ms - 340ms)
         setTimeout(() => {
           cursor.remove();
           resolve();
-        }, 180);
+        }, 280);
       }
-    }, 46);
+    }
+
+    // Initial pause before starting line (200ms)
+    setTimeout(typeNextChar, 200);
   });
 }
 
