@@ -335,6 +335,46 @@
     letter-spacing: 1px;
   }
 
+  /* ===== TOP TELEPROMPTER (SPEAKER-ONLY, CROPPED FROM RECORDING) ===== */
+  #topPrompter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 400;
+    background: #0a0c10;
+    border-bottom: 2px solid rgba(255, 107, 53, 0.4);
+    padding: 10px 28px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  #topPrompter.visible {
+    opacity: 1;
+  }
+  #topPrompterText {
+    color: #ff6b35;
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: 0.3px;
+  }
+  .prompter-label {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: #0a0c10;
+    background: var(--accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 10px;
+    letter-spacing: 1.5px;
+    vertical-align: middle;
+  }
+
   /* ===== APP-ALIGNED CAPTION OVERLAY ===== */
   #captionWrap {
     position: fixed;
@@ -449,6 +489,12 @@
     <span style="font-size: 18px;">→</span>
   </button>
   <div class="title-hint">Click anywhere or press Space / → Arrow to begin</div>
+</div>
+
+<!-- ===== TOP TELEPROMPTER (SPEAKER READS HERE — CROP THIS FROM RECORDING) ===== -->
+<div id="topPrompter">
+  <span class="prompter-label">READ ↓</span>
+  <span id="topPrompterText">Click to start…</span>
 </div>
 
 <!-- ===== CAPTION OVERLAY ===== -->
@@ -732,10 +778,20 @@ function sleep(ms) {
 //  EXACT SCRIPT — 100% VERBATIM WITH LIVE-TYPED TERMINAL
 // ============================================================
 const STEPS = [
-  // ─── MINUTE 1 (0:00 – 1:00): THE HOOK ───
+  // ─── INTRO (0:00 – 0:15): PERSONAL + CONTRARIAN INSIGHT ───
+  {
+    text: "Hi, I'm Pratheep. This is Ledgerscope, built for Track 4: AI Finance Controller.",
+    act: () => { switchView('viewDashboard', 'Ledgerscope', 'STL_2026_08 · 62 records', 'INTEGER PAISE · LIVE'); closeDrawer(); clearHL(); scrollToTop(); }
+  },
+  {
+    text: "The track brief says it clearly — verification capacity, not generation speed, is the bottleneck. So we asked a different question: what if the right AI decision for reconciliation is knowing where NOT to use AI?",
+    act: () => scrollToTop()
+  },
+
+  // ─── MINUTE 1 (0:15 – 1:00): THE HOOK ───
   {
     text: "Every batch, a merchant's settlement file has silent errors in it — a fee plan says 1.90%, but the gateway charges 2.00%; GST gets computed on the wrong base; refund fees never get credited back.",
-    act: () => { switchView('viewDashboard', 'Ledgerscope', 'STL_2026_08 · 62 records', 'INTEGER PAISE · LIVE'); closeDrawer(); clearHL(); scrollToTop(); }
+    act: () => scrollToTop()
   },
   {
     text: "In our test batch, that added up to ₹386 misrouted across just 62 transactions — scale that to a month, and it's ₹3,861 in silent revenue loss.",
@@ -897,11 +953,16 @@ function render(idx) {
   const wrap = document.getElementById('captionWrap');
   const txt  = document.getElementById('captionText');
   const bar  = document.getElementById('progressBar');
+  const topP = document.getElementById('topPrompter');
+  const topT = document.getElementById('topPrompterText');
 
   wrap.classList.remove('visible');
+  topP.classList.remove('visible');
   setTimeout(() => {
     txt.textContent = s.text;
+    topT.textContent = s.text;
     wrap.classList.add('visible');
+    topP.classList.add('visible');
   }, 120);
 
   bar.style.width = `${((idx + 1) / STEPS.length) * 100}%`;
